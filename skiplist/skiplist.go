@@ -55,10 +55,9 @@ func (skipList *SkipList) Insert(key int, value interface{}) {
 		}
 		update[i].forward[i] = node
 	}
-
 }
 
-const p = 0.5
+const p = 0.25
 
 // have p/2 probability return 1
 // have p/4 probability return 2
