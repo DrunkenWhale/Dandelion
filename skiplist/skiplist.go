@@ -3,6 +3,7 @@ package skiplist
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 type SkipList struct {
@@ -57,7 +58,28 @@ func (skipList *SkipList) Insert(key int, value interface{}) {
 	}
 }
 
-const p = 0.25
+func (skipList *SkipList) Get(key int) interface{} {
+	cursor := skipList.head
+	for i := skipList.maxLevel - 1; i >= 0; i-- {
+		if cursor.forward[i] == nil {
+			continue
+		}
+		for key > cursor.forward[i].key {
+			cursor = cursor.forward[i]
+			if cursor.forward[i] == nil {
+				break
+			}
+		}
+		if key == cursor.key {
+			return cursor.value
+		}
+	}
+	return nil
+}
+
+const (
+	p = 0.5
+)
 
 // have p/2 probability return 1
 // have p/4 probability return 2
@@ -82,4 +104,8 @@ func (skipList *SkipList) PrintSkipList() {
 		}
 		fmt.Println()
 	}
+}
+
+func init() {
+	rand.Seed(time.Now().Unix())
 }
