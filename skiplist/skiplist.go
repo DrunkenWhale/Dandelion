@@ -1,6 +1,9 @@
 package skiplist
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type SkipList struct {
 	head       *Node
@@ -8,18 +11,48 @@ type SkipList struct {
 	nodeNumber int
 }
 
-func (skipList *SkipList) NewSkipList() {
-
+func NewSkipList(maxLevel int) *SkipList {
+	return &SkipList{
+		head:       NewNode(-1, nil, maxLevel),
+		maxLevel:   maxLevel,
+		nodeNumber: 0,
+	}
 }
 
 func (skipList *SkipList) Insert(key int, value interface{}) {
 	level := skipList.randomLevel()
+	update := make([]*Node, level)
 	cursor := skipList.head
-	for i := 0; i < skipList.maxLevel; i++ {
-		for cursor.key > cursor.next.key {
-			cursor = cursor.next
+	for i := skipList.maxLevel - 1; i >= 0; i-- {
+		if cursor.forward[i] == nil {
+			update[i] = cursor
+			continue
 		}
-		cursor = cursor.forward
+		for key > cursor.forward[i].key {
+			cursor = cursor.forward[i]
+			if nil == cursor.forward[i] {
+				break
+			}
+		}
+		if i < level {
+			update[i] = cursor
+			// add new node in this node tail
+		}
+	}
+	node := NewNode(key, value, level)
+	node.backward = update[0]
+	for i := 0; i < level; i++ {
+		if update[i].backward == nil {
+			// head node
+			update[i].forward[i] = node
+		} else {
+			node.forward[i] = update[i].forward[i]
+			if update[i].forward[i] != nil {
+				// not a tail node
+				update[i].forward[i].backward = node
+			}
+			update[i].forward[i] = node
+		}
 	}
 
 }
@@ -36,4 +69,17 @@ func (skipList *SkipList) randomLevel() int {
 		level++
 	}
 	return level
+}
+
+func (skipList *SkipList) PrintSkipList() {
+	start := skipList.head
+	for i := 0; i < skipList.maxLevel; i++ {
+		fmt.Print("start")
+		head := start.forward[i]
+		for head != nil {
+			fmt.Printf(" -> %-5d", head.key)
+			head = head.forward[i]
+		}
+		fmt.Println()
+	}
 }

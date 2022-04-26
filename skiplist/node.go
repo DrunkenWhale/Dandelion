@@ -1,16 +1,16 @@
 package skiplist
 
 type Node struct {
-	key     int
-	value   interface{}
-	next    *Node
-	forward *Node
+	key      int
+	value    interface{}
+	backward *Node
+	forward  []*Node
 }
 
-func NewNode(key int) *Node {
+func NewNode(key int, value interface{}, level int) *Node {
 	return &Node{
 		key:     key,
-		next:    nil,
-		forward: nil,
+		value:   value,
+		forward: make([]*Node, level),
 	}
 }
