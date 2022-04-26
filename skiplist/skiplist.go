@@ -20,7 +20,7 @@ func NewSkipList(maxLevel int) *SkipList {
 	}
 }
 
-func (skipList *SkipList) Insert(key int, value interface{}) {
+func (skipList *SkipList) Put(key int, value interface{}) {
 	level := skipList.randomLevel()
 	update := make([]*Node, level)
 	cursor := skipList.head
@@ -62,16 +62,22 @@ func (skipList *SkipList) Get(key int) interface{} {
 	cursor := skipList.head
 	for i := skipList.maxLevel - 1; i >= 0; i-- {
 		if cursor.forward[i] == nil {
+			// this cursor is the tail in the same layer nodes
 			continue
 		}
 		for key > cursor.forward[i].key {
 			cursor = cursor.forward[i]
-			if cursor.forward[i] == nil {
+			if nil == cursor.forward[i] {
 				break
 			}
 		}
-		if key == cursor.key {
-			return cursor.value
+
+		if nil == cursor.forward[i] {
+			continue
+		}
+
+		if key == cursor.forward[i].key {
+			return cursor.forward[i].value
 		}
 	}
 	return nil
