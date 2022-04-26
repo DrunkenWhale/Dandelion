@@ -1,6 +1,7 @@
 package skiplist
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -12,7 +13,7 @@ type SkipList struct {
 
 func NewSkipList(maxLevel int) *SkipList {
 	return &SkipList{
-		head:       NewNode(-1, nil),
+		head:       NewNode(-1, nil, maxLevel),
 		maxLevel:   maxLevel,
 		nodeNumber: 0,
 	}
@@ -23,15 +24,15 @@ func (skipList *SkipList) Insert(key int, value interface{}) {
 	update := make([]*Node, level)
 	cursor := skipList.head
 	for i := skipList.maxLevel - 1; i >= 0; i-- {
-		if cursor.right == nil {
+		if cursor.forward[i] == nil {
 			if i < level {
 				update[i] = cursor
 			}
 			continue
 		}
-		for key > cursor.right.key {
-			cursor = cursor.right
-			if nil == cursor.right {
+		for key > cursor.forward[i].key {
+			cursor = cursor.forward[i]
+			if nil == cursor.forward[i] {
 				break
 			}
 		}
@@ -39,18 +40,21 @@ func (skipList *SkipList) Insert(key int, value interface{}) {
 			update[i] = cursor
 			// add new node in this node tail
 		}
-		cursor = cursor.down
 	}
-	node := NewNode(key, value)
+	node := NewNode(key, value, level)
+	node.backward = update[0]
 	for i := 0; i < level; i++ {
 		//if update[i].backward == nil {
 		//	// head node
 		//	update[i].forward[i] = node
 		//} else {
-		node.right = update[i].right
-		update[i].right = node
+		node.forward[i] = update[i].forward[i]
+		if update[i].forward[i] != nil {
+			// not a tail node
+			update[i].forward[i].backward = node
+		}
+		update[i].forward[i] = node
 	}
-	node.down = NewNode
 
 }
 
@@ -69,14 +73,14 @@ func (skipList *SkipList) randomLevel() int {
 }
 
 func (skipList *SkipList) PrintSkipList() {
-	//start := skipList.head
-	//for i := skipList.maxLevel - 1; i >= 0; i-- {
-	//	fmt.Print("*")
-	//	head := start.forward[i]
-	//	for head != nil {
-	//		fmt.Print("->", head.key)
-	//		head = head.forward[i]
-	//	}
-	//	fmt.Println()
-	//}
+	start := skipList.head
+	for i := skipList.maxLevel - 1; i >= 0; i-- {
+		fmt.Print("*")
+		head := start.forward[i]
+		for head != nil {
+			fmt.Print("->", head.key)
+			head = head.forward[i]
+		}
+		fmt.Println()
+	}
 }
