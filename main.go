@@ -2,18 +2,26 @@ package main
 
 import (
 	"Dandelion/skiplist"
+	"expvar"
+	"fmt"
+	"time"
 )
 
 func main() {
 	skipList := skiplist.NewSkipList(5)
-	skipList.Insert(1, 114514)
-	skipList.Insert(21, 114514)
-	skipList.Insert(121, 114514)
-	skipList.Insert(1231, 114514)
-	skipList.Insert(12231, 114514)
-	skipList.Insert(23421, 114514)
-	skipList.Insert(32451, 114514)
-	skipList.Insert(1322, 114514)
-	skipList.Insert(1324, 114514)
-	skipList.PrintSkipList()
+	t := time.Now().Unix()
+	for i := 0; i < 114514; i++ {
+		skipList.Insert(i, 114514)
+	}
+	fmt.Println(time.Now().Unix() - t)
+	a := expvar.NewMap("name")
+	t1 := time.Now().Unix()
+	for i := 0; i < 114514; i++ {
+		a.Add("114514", 114514)
+	}
+	for i := 0; i < 114514; i++ {
+		a.Add("114514", 114514)
+	}
+	fmt.Println(time.Now().Unix() - t1)
+	//skipList.PrintSkipList()
 }

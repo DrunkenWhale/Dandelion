@@ -25,7 +25,9 @@ func (skipList *SkipList) Insert(key int, value interface{}) {
 	cursor := skipList.head
 	for i := skipList.maxLevel - 1; i >= 0; i-- {
 		if cursor.forward[i] == nil {
-			update[i] = cursor
+			if i < level {
+				update[i] = cursor
+			}
 			continue
 		}
 		for key > cursor.forward[i].key {
@@ -42,17 +44,16 @@ func (skipList *SkipList) Insert(key int, value interface{}) {
 	node := NewNode(key, value, level)
 	node.backward = update[0]
 	for i := 0; i < level; i++ {
-		if update[i].backward == nil {
-			// head node
-			update[i].forward[i] = node
-		} else {
-			node.forward[i] = update[i].forward[i]
-			if update[i].forward[i] != nil {
-				// not a tail node
-				update[i].forward[i].backward = node
-			}
-			update[i].forward[i] = node
+		//if update[i].backward == nil {
+		//	// head node
+		//	update[i].forward[i] = node
+		//} else {
+		node.forward[i] = update[i].forward[i]
+		if update[i].forward[i] != nil {
+			// not a tail node
+			update[i].forward[i].backward = node
 		}
+		update[i].forward[i] = node
 	}
 
 }
@@ -73,11 +74,11 @@ func (skipList *SkipList) randomLevel() int {
 
 func (skipList *SkipList) PrintSkipList() {
 	start := skipList.head
-	for i := 0; i < skipList.maxLevel; i++ {
-		fmt.Print("start")
+	for i := skipList.maxLevel - 1; i >= 0; i-- {
+		fmt.Print("*")
 		head := start.forward[i]
 		for head != nil {
-			fmt.Printf(" -> %-5d", head.key)
+			fmt.Print("->", head.key)
 			head = head.forward[i]
 		}
 		fmt.Println()
