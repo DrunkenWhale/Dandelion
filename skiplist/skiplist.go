@@ -59,6 +59,25 @@ func (skipList *SkipList) Put(key int, value interface{}) {
 }
 
 func (skipList *SkipList) Get(key int) interface{} {
+	node := skipList.search(key)
+	if node == nil {
+		return nil
+	} else {
+		return node.value
+	}
+}
+
+func (skipList *SkipList) Update(key int, value interface{}) bool {
+	node := skipList.search(key)
+	if node == nil {
+		return false
+	} else {
+		node.value = value
+		return true
+	}
+}
+
+func (skipList *SkipList) Delete(key int) {
 	cursor := skipList.head
 	for i := skipList.maxLevel - 1; i >= 0; i-- {
 		if cursor.forward[i] == nil {
@@ -77,7 +96,34 @@ func (skipList *SkipList) Get(key int) interface{} {
 		}
 
 		if key == cursor.forward[i].key {
-			return cursor.forward[i].value
+			if i == 0 && cursor.forward[i].forward[i] != nil {
+				cursor.forward[i].forward[i].backward = cursor.forward[i]
+			}
+			cursor.forward[i] = cursor.forward[i].forward[i]
+		}
+	}
+}
+
+func (skipList *SkipList) search(key int) *Node {
+	cursor := skipList.head
+	for i := skipList.maxLevel - 1; i >= 0; i-- {
+		if cursor.forward[i] == nil {
+			// this cursor is the tail in the same layer nodes
+			continue
+		}
+		for key > cursor.forward[i].key {
+			cursor = cursor.forward[i]
+			if nil == cursor.forward[i] {
+				break
+			}
+		}
+
+		if nil == cursor.forward[i] {
+			continue
+		}
+
+		if key == cursor.forward[i].key {
+			return cursor.forward[i]
 		}
 	}
 	return nil
