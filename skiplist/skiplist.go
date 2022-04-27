@@ -20,7 +20,7 @@ func NewSkipList(maxLevel int) *SkipList {
 	}
 }
 
-func (skipList *SkipList) Put(key int, value interface{}) {
+func (skipList *SkipList) Put(key int, value []byte) {
 	level := skipList.randomLevel()
 	update := make([]*Node, level)
 	cursor := skipList.head
@@ -58,7 +58,7 @@ func (skipList *SkipList) Put(key int, value interface{}) {
 	}
 }
 
-func (skipList *SkipList) Get(key int) interface{} {
+func (skipList *SkipList) Get(key int) []byte {
 	node := skipList.search(key)
 	if node == nil {
 		return nil
@@ -67,7 +67,7 @@ func (skipList *SkipList) Get(key int) interface{} {
 	}
 }
 
-func (skipList *SkipList) Update(key int, value interface{}) bool {
+func (skipList *SkipList) Update(key int, value []byte) bool {
 	node := skipList.search(key)
 	if node == nil {
 		return false
@@ -129,6 +129,16 @@ func (skipList *SkipList) search(key int) *Node {
 	return nil
 }
 
+func (skipList *SkipList) ExportAllElement() []*KV {
+	res := make([]*KV, 0)
+	cursor := skipList.head.forward[0]
+	for nil != cursor {
+		res = append(res, NewKV(cursor.key, cursor.value))
+		cursor = cursor.forward[0]
+	}
+	return res
+}
+
 const (
 	p = 0.5
 )
@@ -147,6 +157,7 @@ func (skipList *SkipList) randomLevel() int {
 
 func (skipList *SkipList) PrintSkipList() {
 	start := skipList.head
+	fmt.Println("\n--------------------------")
 	for i := skipList.maxLevel - 1; i >= 0; i-- {
 		fmt.Print("*")
 		head := start.forward[i]
@@ -156,6 +167,7 @@ func (skipList *SkipList) PrintSkipList() {
 		}
 		fmt.Println()
 	}
+	fmt.Println("\n--------------------------")
 }
 
 func init() {
