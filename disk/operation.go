@@ -29,12 +29,7 @@ func WriteDBFile(filename string, kv []*util.KV) {
 	}(file)
 
 	for _, entity := range kv {
-		_, err := file.Write(append([]byte(strconv.Itoa(entity.Key)), sep))
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-		_, err = file.Write(append(entity.Value, sep))
+		_, err := file.Write(entity.ToByteArray())
 		if err != nil {
 			log.Fatalln(err)
 			return
