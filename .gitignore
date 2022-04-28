@@ -1,3 +1,6 @@
 /.idea
 *.exe
 *.txt
+
+/test
+!/test/*.go
