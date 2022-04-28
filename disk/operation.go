@@ -15,7 +15,7 @@ const (
 
 func WriteDBFile(filename string, kv []*util.KV) {
 
-	file, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0)
 	if err != nil {
 		log.Fatalln(err)
 		return
