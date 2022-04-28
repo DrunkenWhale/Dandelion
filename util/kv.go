@@ -1,4 +1,4 @@
-package skiplist
+package util
 
 type KV struct {
 	Key   int

@@ -1,6 +1,7 @@
 package skiplist
 
 import (
+	"Dandelion/util"
 	"fmt"
 	"math/rand"
 	"time"
@@ -129,11 +130,11 @@ func (skipList *SkipList) search(key int) *Node {
 	return nil
 }
 
-func (skipList *SkipList) ExportAllElement() []*KV {
-	res := make([]*KV, 0)
+func (skipList *SkipList) ExportAllElement() []*util.KV {
+	res := make([]*util.KV, 0)
 	cursor := skipList.head.forward[0]
 	for nil != cursor {
-		res = append(res, NewKV(cursor.key, cursor.value))
+		res = append(res, util.NewKV(cursor.key, cursor.value))
 		cursor = cursor.forward[0]
 	}
 	return res
