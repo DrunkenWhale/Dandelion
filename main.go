@@ -1,13 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"Dandelion/skiplist"
+	"Dandelion/sstable"
+	"strconv"
 )
 
 func main() {
-	a, _ := os.ReadDir(".")
-	for _, e := range a {
-		fmt.Println(e.Name())
+	skipList := skiplist.NewSkipList(32)
+	for i := 17191; i < 871914; i++ {
+		skipList.Put(i, []byte(strconv.Itoa(i*7)))
 	}
+	sstable.StorageData(skipList)
 }

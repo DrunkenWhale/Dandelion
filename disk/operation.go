@@ -4,18 +4,19 @@ import (
 	"Dandelion/util"
 	"bufio"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 )
 
 const (
-	sep byte = 3
+	sep byte = 45
 )
 
 func WriteDBFile(filename string, kv []*util.KV) {
 
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0)
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		log.Fatalln(err)
 		return
@@ -39,7 +40,7 @@ func WriteDBFile(filename string, kv []*util.KV) {
 
 func ReadDBFile(filename string) []*util.KV {
 	kvArray := make([]*util.KV, 0)
-	file, err := os.Open(filename)
+	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		log.Fatalln(err)
 		return nil
@@ -52,7 +53,13 @@ func ReadDBFile(filename string) []*util.KV {
 		}
 	}(file)
 
-	buf := bufio.NewReader(file)
+	_, err = ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalln(err)
+		return nil
+	}
+
+	buf := bufio.NewReaderSize(file, 4096)
 	for {
 		keyBytes, err := buf.ReadSlice(sep)
 		if err != nil {
@@ -73,7 +80,8 @@ func ReadDBFile(filename string) []*util.KV {
 			log.Fatalln(err)
 			return nil
 		}
-		kvArray = append(kvArray, util.NewKV(key, valueBytes))
+		kvArray = append(kvArray, util.NewKV(key, valueBytes[:len(valueBytes)-1]))
 	}
+
 	return kvArray
 }

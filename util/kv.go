@@ -17,11 +17,11 @@ func NewKV(key int, value []byte) *KV {
 	}
 }
 
-const sep = 3
+const sep = 45
 
 func (kv *KV) ToByteArray() []byte {
 	buf := new(bytes.Buffer)
-	buf.WriteString(strconv.Itoa(kv.Key))
+	buf.Write([]byte(strconv.Itoa(kv.Key)))
 	buf.WriteByte(sep)
 	buf.Write(kv.Value)
 	buf.WriteByte(sep)

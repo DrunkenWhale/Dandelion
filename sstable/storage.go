@@ -1,18 +1,53 @@
 package sstable
 
 import (
+	"Dandelion/disk"
 	"Dandelion/skiplist"
+	"log"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
-	filePrefix = "dandelion_db_storage"
+	storageFilePrefix     = "dandelion_db_storage_data_"
+	storageFilePathPrefix = "data" + string(os.PathSeparator)
+	level1MaxSize         = 1024 * 1024 * 8
 )
 
 var currentProjectPath, _ = os.Getwd()
-var currentStoragePath = currentProjectPath + string(os.PathSeparator) + "data"
+var currentStoragePath = currentProjectPath + string(os.PathSeparator) + "data" + string(os.PathSeparator)
 
 func StorageData(list *skiplist.SkipList) {
-	list.ExportAllElement()
-	//disk.WriteDBFile()
+	filename := nextDBStorageFileName()
+	oldKV := disk.ReadDBFile(storageFilePathPrefix + filename)
+	newKV := list.ExportAllElement()
+	res := disk.KVArrayMerge(oldKV, newKV)
+	disk.WriteDBFile(storageFilePathPrefix+filename, res)
+}
+
+func nextDBStorageFileName() string {
+	dir, err := os.ReadDir(currentStoragePath)
+	if err != nil {
+		log.Fatalln(err)
+		return ""
+	}
+
+	var res os.DirEntry = nil
+
+	for _, entity := range dir {
+		if !entity.IsDir() && strings.HasPrefix(entity.Name(), storageFilePrefix) {
+			res = entity
+		}
+	}
+	if res == nil {
+		return storageFilePrefix + strconv.FormatInt(time.Now().Unix(), 10)
+	}
+	info, err := res.Info()
+	if info.Size() > level1MaxSize {
+		return storageFilePrefix + strconv.FormatInt(time.Now().Unix(), 10)
+	}
+	return info.Name()
+
 }
