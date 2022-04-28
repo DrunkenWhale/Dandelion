@@ -38,6 +38,5 @@ func KVArrayMerge(new []*util.KV, old []*util.KV) []*util.KV {
 		res = append(res, old[oldIndex])
 		oldIndex++
 	}
-
 	return res
 }

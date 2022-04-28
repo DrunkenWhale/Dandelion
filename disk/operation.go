@@ -4,14 +4,15 @@ import (
 	"Dandelion/util"
 	"bufio"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 )
 
 const (
-	sep byte = 45
+	sep               byte = util.Sep
+	defaultBufferSize      = 2 * 4096
+	closingBound           = defaultBufferSize * 9 / 10
 )
 
 func WriteDBFile(filename string, kv []*util.KV) {
@@ -29,13 +30,22 @@ func WriteDBFile(filename string, kv []*util.KV) {
 		}
 	}(file)
 
+	buf := bufio.NewWriterSize(file, defaultBufferSize)
 	for _, entity := range kv {
-		_, err := file.Write(entity.ToByteArray())
+		_, err := buf.Write(entity.ToByteArray())
 		if err != nil {
 			log.Fatalln(err)
 			return
 		}
+		if closingBound < buf.Buffered() {
+			err = buf.Flush()
+			if err != nil {
+				log.Fatalln(err)
+				return
+			}
+		}
 	}
+
 }
 
 func ReadDBFile(filename string) []*util.KV {
@@ -53,15 +63,14 @@ func ReadDBFile(filename string) []*util.KV {
 		}
 	}(file)
 
-	_, err = ioutil.ReadAll(file)
 	if err != nil {
 		log.Fatalln(err)
 		return nil
 	}
 
-	buf := bufio.NewReaderSize(file, 4096)
+	buf := bufio.NewReaderSize(file, defaultBufferSize)
 	for {
-		keyBytes, err := buf.ReadSlice(sep)
+		keyBytes, err := buf.ReadString(sep)
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -70,17 +79,17 @@ func ReadDBFile(filename string) []*util.KV {
 				return nil
 			}
 		}
-		valueBytes, err := buf.ReadSlice(sep)
+		valueBytes, err := buf.ReadString(sep)
 		if err != nil {
 			log.Fatalln(err)
 			return nil
 		}
-		key, err := strconv.Atoi(string(keyBytes[:len(keyBytes)-1]))
+		key, err := strconv.Atoi(keyBytes[:len(keyBytes)-1])
 		if err != nil {
 			log.Fatalln(err)
 			return nil
 		}
-		kvArray = append(kvArray, util.NewKV(key, valueBytes[:len(valueBytes)-1]))
+		kvArray = append(kvArray, util.NewKV(key, []byte(valueBytes[:len(valueBytes)-1])))
 	}
 
 	return kvArray
