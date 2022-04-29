@@ -20,6 +20,8 @@ func NewSkipList(maxLevel int) *SkipList {
 		head:       NewNode(-1, nil, maxLevel),
 		maxLevel:   maxLevel,
 		nodeNumber: 0,
+		size:       0,
+		memorySize: 0,
 	}
 }
 
@@ -34,16 +36,16 @@ func (skipList *SkipList) Put(key int, value []byte) {
 			}
 			continue
 		}
-		for key > cursor.forward[i].key {
+		for key >= cursor.forward[i].key {
+			if cursor.forward[i].key == key {
+				skipList.memorySize += len(value) - len(cursor.forward[i].value)
+				cursor.forward[i].value = value
+				return
+			}
 			cursor = cursor.forward[i]
 			if nil == cursor.forward[i] {
 				break
 			}
-		}
-		if cursor.forward[i].key == key {
-			skipList.memorySize += len(value) - len(cursor.forward[i].value)
-			cursor.forward[i].value = value
-			return
 		}
 		if i < level {
 			update[i] = cursor
@@ -64,6 +66,7 @@ func (skipList *SkipList) Put(key int, value []byte) {
 		}
 		update[i].forward[i] = node
 	}
+	skipList.memorySize += len(update[0].value)
 	skipList.size++
 }
 

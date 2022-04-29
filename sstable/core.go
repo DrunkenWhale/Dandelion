@@ -2,7 +2,7 @@ package sstable
 
 import "Dandelion/skiplist"
 
-const defaultMemorySize = 4096 * 8
+const defaultMemorySize = 4096 * 68
 const defaultSkipListHeight = 32
 
 type SSTable struct {
