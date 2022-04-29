@@ -11,6 +11,8 @@ type SkipList struct {
 	head       *Node
 	maxLevel   int
 	nodeNumber int
+	size       int
+	memorySize int
 }
 
 func NewSkipList(maxLevel int) *SkipList {
@@ -38,6 +40,11 @@ func (skipList *SkipList) Put(key int, value []byte) {
 				break
 			}
 		}
+		if cursor.forward[i].key == key {
+			skipList.memorySize += len(value) - len(cursor.forward[i].value)
+			cursor.forward[i].value = value
+			return
+		}
 		if i < level {
 			update[i] = cursor
 			// add new node in this node tail
@@ -57,6 +64,7 @@ func (skipList *SkipList) Put(key int, value []byte) {
 		}
 		update[i].forward[i] = node
 	}
+	skipList.size++
 }
 
 func (skipList *SkipList) Get(key int) []byte {
@@ -73,6 +81,7 @@ func (skipList *SkipList) Update(key int, value []byte) bool {
 	if node == nil {
 		return false
 	} else {
+		skipList.memorySize += len(value) - len(node.value)
 		node.value = value
 		return true
 	}
@@ -98,6 +107,8 @@ func (skipList *SkipList) Delete(key int) {
 
 		if key == cursor.forward[i].key {
 			if i == 0 && cursor.forward[i].forward[i] != nil {
+				skipList.memorySize -= len(cursor.forward[i].value)
+				skipList.size--
 				cursor.forward[i].forward[i].backward = cursor.forward[i]
 			}
 			cursor.forward[i] = cursor.forward[i].forward[i]
@@ -169,6 +180,16 @@ func (skipList *SkipList) PrintSkipList() {
 		fmt.Println()
 	}
 	fmt.Println("\n--------------------------")
+}
+
+// Size skip list's element size ,exclude pointer
+func (skipList SkipList) Size() int {
+	return skipList.size
+}
+
+// MemorySize skip list's element's value size,exclude key and pointer
+func (skipList *SkipList) MemorySize() int {
+	return skipList.memorySize
 }
 
 func init() {

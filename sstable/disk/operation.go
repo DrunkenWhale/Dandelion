@@ -39,7 +39,6 @@ func WriteDBFile(filename string, kv []*util.KV) error {
 		if closingBound < buf.Buffered() {
 			err = buf.Flush()
 			if err != nil {
-				log.Fatalln(err)
 				return err
 			}
 		}
