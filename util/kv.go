@@ -17,7 +17,7 @@ func NewKV(key int, value []byte) *KV {
 	}
 }
 
-const Sep = 45
+const Sep = 2
 
 func (kv *KV) ToByteArray() []byte {
 	buf := new(bytes.Buffer)

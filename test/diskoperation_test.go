@@ -1,8 +1,8 @@
 package test
 
 import (
-	"Dandelion/disk"
 	"Dandelion/skiplist"
+	"Dandelion/sstable/disk"
 	"log"
 	"os"
 	"testing"

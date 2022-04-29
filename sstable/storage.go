@@ -1,8 +1,8 @@
 package sstable
 
 import (
-	"Dandelion/disk"
 	"Dandelion/skiplist"
+	disk2 "Dandelion/sstable/disk"
 	"log"
 	"os"
 	"strconv"
@@ -21,10 +21,10 @@ var currentStoragePath = currentProjectPath + string(os.PathSeparator) + "data" 
 
 func StorageData(list *skiplist.SkipList) {
 	filename := nextDBStorageFileName()
-	oldKV := disk.ReadDBFile(storageFilePathPrefix + filename)
+	oldKV := disk2.ReadDBFile(storageFilePathPrefix + filename)
 	newKV := list.ExportAllElement()
-	res := disk.KVArrayMerge(oldKV, newKV)
-	disk.WriteDBFile(storageFilePathPrefix+filename, res)
+	res := disk2.KVArrayMerge(oldKV, newKV)
+	disk2.WriteDBFile(storageFilePathPrefix+filename, res)
 }
 
 func nextDBStorageFileName() string {
