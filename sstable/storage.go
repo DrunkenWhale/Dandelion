@@ -102,6 +102,10 @@ func writeDBIndexToFile(suffix string, koffset []*util.KIndex) error {
 			}
 		}
 	}
+	err = buf.Flush()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -146,7 +150,19 @@ func ReadAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 	return kvArray, nil
 }
 
-func readDBIndexFile(suffix string) ([]*util.KIndex, error) {
+func SearchKVFromFile(key int) error {
+	suffix, err := nextDBFileSuffix()
+	if err != nil {
+		return err
+	}
+	kIndexArray, err := readDBIndexFromFile(suffix)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func readDBIndexFromFile(suffix string) ([]*util.KIndex, error) {
 	kIndexArray := make([]*util.KIndex, 0)
 	file, err := os.OpenFile(filePathPrefix+indexFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -178,8 +194,14 @@ func readDBIndexFile(suffix string) ([]*util.KIndex, error) {
 			return nil, err
 		}
 		key, err := strconv.Atoi(keyBytes[:len(keyBytes)-1])
-		start, err := strconv.Atoi(keyBytes[:len(startBytes)-1])
-		end, err := strconv.Atoi(keyBytes[:len(endBytes)-1])
+		if err != nil {
+			return nil, err
+		}
+		start, err := strconv.Atoi(startBytes[:len(startBytes)-1])
+		if err != nil {
+			return nil, err
+		}
+		end, err := strconv.Atoi(endBytes[:len(endBytes)-1])
 		if err != nil {
 			return nil, err
 		}

@@ -7,11 +7,15 @@ import (
 
 func main() {
 	table := sstable.NewSSTable()
-	for i := 0; i < 114514; i++ {
+
+	for i := 0; i < 70007; i++ {
 		err := table.Put(i, []byte("114514"))
 		if err != nil {
 			log.Fatalln(err)
 		}
 	}
-
+	err := sstable.SearchKVFromFile(114)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

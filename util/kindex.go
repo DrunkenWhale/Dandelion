@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 )
 
@@ -26,5 +27,6 @@ func (k KIndex) ToByteArray() []byte {
 	buf.WriteByte(Sep)
 	buf.Write([]byte(strconv.Itoa(k.end)))
 	buf.WriteByte(Sep)
+	fmt.Println(k)
 	return buf.Bytes()
 }
