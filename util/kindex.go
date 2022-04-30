@@ -11,7 +11,7 @@ type KIndex struct {
 	end   int
 }
 
-func NewKOffset(key int, start int, end int) *KIndex {
+func NewKIndex(key int, start int, end int) *KIndex {
 	return &KIndex{
 		key:   key,
 		start: start,

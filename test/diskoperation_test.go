@@ -17,7 +17,7 @@ func TestWriteDBFile(t *testing.T) {
 	skipList.Put(72378, []byte("114"))
 	skipList.Put(73478, []byte("???"))
 	skipList.Put(77568, []byte("&&&"))
-	sstable.WriteDBDataFile("test.txt", skipList.ExportAllElement())
+	sstable.WriteDBFile("test.txt", skipList.ExportAllElement())
 	f, err := os.OpenFile("test.txt", os.O_WRONLY|os.O_CREATE, 0666)
 	defer func(f *os.File) {
 		err := f.Close()

@@ -1,11 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"strings"
+	"Dandelion/sstable"
+	"log"
 )
 
 func main() {
-	a := "1145_1__4_1919810"
-	fmt.Println(strings.Split(a, "_"))
+	table := sstable.NewSSTable()
+	for i := 0; i < 11451419; i++ {
+		err := table.Put(i, []byte("114514"))
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
 }

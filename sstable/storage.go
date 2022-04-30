@@ -4,6 +4,7 @@ import (
 	"Dandelion/skiplist"
 	"Dandelion/util"
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -28,7 +29,7 @@ var (
 	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + "data" + string(os.PathSeparator)
 )
 
-func WriteDBDataFile(suffix string, kv []*util.KV) error {
+func WriteDBFile(suffix string, kv []*util.KV) error {
 
 	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -43,8 +44,14 @@ func WriteDBDataFile(suffix string, kv []*util.KV) error {
 	}(file)
 
 	buf := bufio.NewWriterSize(file, defaultBufferSize)
-	for _, entity := range kv {
-		_, err := buf.Write(entity.ToByteArray())
+
+	kIndexes := make([]*util.KIndex, 0)
+
+	start, end := 0, 0
+
+	for index, entity := range kv {
+		entityBytes := entity.ToByteArray()
+		_, err := buf.Write(entityBytes)
 		if err != nil {
 			log.Fatalln(err)
 			return err
@@ -55,12 +62,23 @@ func WriteDBDataFile(suffix string, kv []*util.KV) error {
 				return err
 			}
 		}
+		end += len(entityBytes)
+		fmt.Println(string(entityBytes), len(entityBytes))
+		if index%indexRangeSize == 0 {
+			kIndexes = append(kIndexes, util.NewKIndex(entity.Key, start, end))
+			start = end + 1
+		}
+	}
+	err = writeDBIndexFile(suffix, kIndexes)
+	if err != nil {
+		return err
+
 	}
 	return nil
 }
 
-func WriteDBIndexFile(filename string, koffset []*util.KIndex) error {
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
+func writeDBIndexFile(suffix string, koffset []*util.KIndex) error {
+	file, err := os.OpenFile(filePathPrefix+indexFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -141,7 +159,7 @@ func FreezeDataToFile(list *skiplist.SkipList) error {
 	}
 	newKV := list.ExportAllElement()
 	res := KVArrayMerge(oldKV, newKV)
-	err = WriteDBDataFile(suffixString, res)
+	err = WriteDBFile(suffixString, res)
 	if err != nil {
 		return err
 	}
