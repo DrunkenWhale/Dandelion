@@ -20,6 +20,7 @@ const (
 	indexFilePrefix   = "dandelion_db_storage_index_"
 	filePathPrefix    = "data" + string(os.PathSeparator)
 	level1MaxSize     = 1024 * 1024 * 8
+	indexRangeSize    = 32
 )
 
 var (
@@ -27,9 +28,9 @@ var (
 	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + "data" + string(os.PathSeparator)
 )
 
-func WriteDBDataFile(filename string, kv []*util.KV) error {
+func WriteDBDataFile(suffix string, kv []*util.KV) error {
 
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func WriteDBDataFile(filename string, kv []*util.KV) error {
 	return nil
 }
 
-func WriteDBIndexFile(filename string, koffset []*util.KOffset) error {
+func WriteDBIndexFile(filename string, koffset []*util.KIndex) error {
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
@@ -88,9 +89,9 @@ func WriteDBIndexFile(filename string, koffset []*util.KOffset) error {
 	return nil
 }
 
-func ReadDBFile(filename string) ([]*util.KV, error) {
+func ReadDBDataFile(suffix string) ([]*util.KV, error) {
 	kvArray := make([]*util.KV, 0)
-	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return nil, err
 	}
@@ -129,6 +130,51 @@ func ReadDBFile(filename string) ([]*util.KV, error) {
 	return kvArray, nil
 }
 
+func FreezeDataToFile(list *skiplist.SkipList) error {
+	suffixString, err := nextDBFileSuffix()
+	if err != nil {
+		return err
+	}
+	oldKV, err := ReadDBDataFile(suffixString)
+	if err != nil {
+		return err
+	}
+	newKV := list.ExportAllElement()
+	res := KVArrayMerge(oldKV, newKV)
+	err = WriteDBDataFile(suffixString, res)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func nextDBFileSuffix() (string, error) {
+	dir, err := os.ReadDir(currentStoragePath)
+	if err != nil {
+		return "", nil
+	}
+
+	var res os.DirEntry = nil
+
+	for _, entity := range dir {
+		if !entity.IsDir() && strings.HasPrefix(entity.Name(), dataFilePrefix) {
+			res = entity
+		}
+	}
+	timeString := strconv.FormatInt(time.Now().Unix(), 10)
+	if res == nil {
+		return timeString, nil
+	}
+	info, err := res.Info()
+	if info.Size() > level1MaxSize {
+		return timeString, nil
+	}
+	splitArray := strings.Split(info.Name(), "_")
+	fileTimeString := splitArray[len(splitArray)-1]
+	return fileTimeString, nil
+
+}
+
 func GetDBDataFileList() ([]string, error) {
 	dir, err := os.ReadDir(currentStoragePath)
 	if err != nil {
@@ -155,44 +201,4 @@ func GetDBIndexFileList() ([]string, error) {
 		}
 	}
 	return res, nil
-}
-
-func FreezeDataToFile(list *skiplist.SkipList) error {
-	filename := nextDBStorageFileName()
-	oldKV, err := ReadDBFile(filePathPrefix + filename)
-	if err != nil {
-		return err
-	}
-	newKV := list.ExportAllElement()
-	res := KVArrayMerge(oldKV, newKV)
-	err = WriteDBDataFile(filePathPrefix+filename, res)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func nextDBStorageFileName() string {
-	dir, err := os.ReadDir(currentStoragePath)
-	if err != nil {
-		log.Fatalln(err)
-		return ""
-	}
-
-	var res os.DirEntry = nil
-
-	for _, entity := range dir {
-		if !entity.IsDir() && strings.HasPrefix(entity.Name(), dataFilePrefix) {
-			res = entity
-		}
-	}
-	if res == nil {
-		return dataFilePrefix + strconv.FormatInt(time.Now().Unix(), 10)
-	}
-	info, err := res.Info()
-	if info.Size() > level1MaxSize {
-		return dataFilePrefix + strconv.FormatInt(time.Now().Unix(), 10)
-	}
-	return info.Name()
-
 }

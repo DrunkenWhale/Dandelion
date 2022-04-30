@@ -24,7 +24,7 @@ func (table *SSTable) Get(key int) {
 func (table *SSTable) Put(key int, value []byte) error {
 	table.skipList.Put(key, value)
 	if table.skipList.MemorySize() > defaultMemorySize {
-		err := FreezeData(table.skipList)
+		err := FreezeDataToFile(table.skipList)
 		if err != nil {
 			return err
 		}
@@ -42,5 +42,9 @@ func (table *SSTable) Delete(key int) {
 }
 
 func (table *SSTable) search(key int) {
+
+}
+
+func (table *SSTable) searchFromFile(key int, filename string) {
 
 }

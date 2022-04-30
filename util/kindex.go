@@ -1,16 +1,30 @@
 package util
 
-type KOffset struct {
-	key    int
-	offset int
+import (
+	"bytes"
+	"strconv"
+)
+
+type KIndex struct {
+	key   int
+	start int
+	end   int
 }
 
-func NewKOffset(key int, offset int) *KOffset {
-	return &KOffset{
-		key:    key,
-		offset: offset,
+func NewKOffset(key int, start int, end int) *KIndex {
+	return &KIndex{
+		key:   key,
+		start: start,
+		end:   end,
 	}
 }
-func (k KOffset) ToByteArray() []byte {
-	
+func (k KIndex) ToByteArray() []byte {
+	buf := new(bytes.Buffer)
+	buf.Write([]byte(strconv.Itoa(k.key)))
+	buf.WriteByte(Sep)
+	buf.Write([]byte(strconv.Itoa(k.start)))
+	buf.WriteByte(Sep)
+	buf.Write([]byte(strconv.Itoa(k.end)))
+	buf.WriteByte(Sep)
+	return buf.Bytes()
 }
