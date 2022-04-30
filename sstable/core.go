@@ -24,7 +24,7 @@ func (table *SSTable) Get(key int) {
 func (table *SSTable) Put(key int, value []byte) error {
 	table.skipList.Put(key, value)
 	if table.skipList.MemorySize() > defaultMemorySize {
-		err := StorageData(table.skipList)
+		err := FreezeData(table.skipList)
 		if err != nil {
 			return err
 		}

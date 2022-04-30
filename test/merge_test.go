@@ -2,7 +2,7 @@ package test
 
 import (
 	"Dandelion/skiplist"
-	disk2 "Dandelion/sstable/disk"
+	"Dandelion/sstable"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -17,9 +17,9 @@ func TestMerge(t *testing.T) {
 		s1.Put(i, []byte(strconv.Itoa(i*rand.Int())))
 		s2.Put(i+57, []byte(strconv.Itoa(i*rand.Int())))
 	}
-	r := disk2.KVArrayMerge(s1.ExportAllElement(), s2.ExportAllElement())
+	r := sstable.KVArrayMerge(s1.ExportAllElement(), s2.ExportAllElement())
 	for _, e := range r {
 		fmt.Println(e.Key, "==>", string(e.Value))
 	}
-	disk2.WriteDBFile("test", r)
+	sstable.WriteDBFile("test", r)
 }
