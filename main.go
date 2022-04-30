@@ -7,7 +7,7 @@ import (
 
 func main() {
 	table := sstable.NewSSTable()
-	for i := 0; i < 11451419; i++ {
+	for i := 0; i < 114514; i++ {
 		err := table.Put(i, []byte("114514"))
 		if err != nil {
 			log.Fatalln(err)

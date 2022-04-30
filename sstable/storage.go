@@ -4,7 +4,6 @@ import (
 	"Dandelion/skiplist"
 	"Dandelion/util"
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -29,7 +28,7 @@ var (
 	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + "data" + string(os.PathSeparator)
 )
 
-func WriteDBFile(suffix string, kv []*util.KV) error {
+func WriteDBToFile(suffix string, kv []*util.KV) error {
 
 	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -63,13 +62,12 @@ func WriteDBFile(suffix string, kv []*util.KV) error {
 			}
 		}
 		end += len(entityBytes)
-		fmt.Println(string(entityBytes), len(entityBytes))
 		if index%indexRangeSize == 0 {
 			kIndexes = append(kIndexes, util.NewKIndex(entity.Key, start, end))
 			start = end + 1
 		}
 	}
-	err = writeDBIndexFile(suffix, kIndexes)
+	err = writeDBIndexToFile(suffix, kIndexes)
 	if err != nil {
 		return err
 
@@ -77,7 +75,7 @@ func WriteDBFile(suffix string, kv []*util.KV) error {
 	return nil
 }
 
-func writeDBIndexFile(suffix string, koffset []*util.KIndex) error {
+func writeDBIndexToFile(suffix string, koffset []*util.KIndex) error {
 	file, err := os.OpenFile(filePathPrefix+indexFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
@@ -107,7 +105,7 @@ func writeDBIndexFile(suffix string, koffset []*util.KIndex) error {
 	return nil
 }
 
-func ReadDBDataFile(suffix string) ([]*util.KV, error) {
+func ReadAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 	kvArray := make([]*util.KV, 0)
 	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -148,18 +146,61 @@ func ReadDBDataFile(suffix string) ([]*util.KV, error) {
 	return kvArray, nil
 }
 
+func readDBIndexFile(suffix string) ([]*util.KIndex, error) {
+	kIndexArray := make([]*util.KIndex, 0)
+	file, err := os.OpenFile(filePathPrefix+indexFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
+	if err != nil {
+		return nil, err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}(file)
+
+	buf := bufio.NewReaderSize(file, defaultBufferSize)
+	for {
+		keyBytes, err := buf.ReadString(sep)
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return nil, err
+			}
+		}
+		startBytes, err := buf.ReadString(sep)
+		if err != nil {
+			return nil, err
+		}
+		endBytes, err := buf.ReadString(sep)
+		if err != nil {
+			return nil, err
+		}
+		key, err := strconv.Atoi(keyBytes[:len(keyBytes)-1])
+		start, err := strconv.Atoi(keyBytes[:len(startBytes)-1])
+		end, err := strconv.Atoi(keyBytes[:len(endBytes)-1])
+		if err != nil {
+			return nil, err
+		}
+		kIndexArray = append(kIndexArray, util.NewKIndex(key, start, end))
+	}
+
+	return kIndexArray, nil
+}
+
 func FreezeDataToFile(list *skiplist.SkipList) error {
 	suffixString, err := nextDBFileSuffix()
 	if err != nil {
 		return err
 	}
-	oldKV, err := ReadDBDataFile(suffixString)
+	oldKV, err := ReadAllDBDataFromFile(suffixString)
 	if err != nil {
 		return err
 	}
 	newKV := list.ExportAllElement()
 	res := KVArrayMerge(oldKV, newKV)
-	err = WriteDBFile(suffixString, res)
+	err = WriteDBToFile(suffixString, res)
 	if err != nil {
 		return err
 	}
