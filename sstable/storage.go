@@ -131,10 +131,6 @@ func ReadAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 		}
 	}(file)
 
-	if err != nil {
-		return nil, err
-	}
-
 	buf := bufio.NewReaderSize(file, defaultBufferSize)
 	for {
 		keyBytes, err := buf.ReadString(sep)
@@ -154,6 +150,49 @@ func ReadAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 			return nil, err
 		}
 		kvArray = append(kvArray, util.NewKV(key, []byte(valueBytes[:len(valueBytes)-1])))
+	}
+
+	return kvArray, nil
+}
+
+func readRangeDBDataFromFile(suffix string, key int, start int, end int) ([]*util.KV, error) {
+	kvArray := make([]*util.KV, 0)
+	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
+	if err != nil {
+		return nil, err
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}(file)
+	buf := bufio.NewReaderSize(file, defaultBufferSize)
+	_, err = buf.Discard(start)
+	if err != nil {
+		return nil, err
+	}
+	size := end - start
+	readBytesSize := 0
+	for readBytesSize < size {
+		keyBytes, err := buf.ReadString(sep)
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return nil, err
+			}
+		}
+		valueBytes, err := buf.ReadString(sep)
+		if err != nil {
+			return nil, err
+		}
+		key, err := strconv.Atoi(keyBytes[:len(keyBytes)-1])
+		if err != nil {
+			return nil, err
+		}
+		kvArray = append(kvArray, util.NewKV(key, []byte(valueBytes[:len(valueBytes)-1])))
+		readBytesSize += len(keyBytes) + len(valueBytes)
 	}
 
 	return kvArray, nil
