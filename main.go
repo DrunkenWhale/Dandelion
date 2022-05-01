@@ -2,7 +2,6 @@ package main
 
 import (
 	"Dandelion/sstable"
-	"fmt"
 	"log"
 )
 
@@ -18,11 +17,6 @@ func main() {
 	err := sstable.SearchKVFromFile(37)
 	if err != nil {
 		log.Fatalln(err)
-	}
-
-	collection, _ := sstable.readRangeDBDataFromFile("1651397189", 321, 640)
-	for _, i2 := range collection {
-		fmt.Println(i2.Key, "==>", string(i2.Value))
 	}
 
 }
