@@ -20,7 +20,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	collection, _ := sstable.ReadRangeDBDataFromFile("1651397189", 321, 640)
+	collection, _ := sstable.readRangeDBDataFromFile("1651397189", 321, 640)
 	for _, i2 := range collection {
 		fmt.Println(i2.Key, "==>", string(i2.Value))
 	}

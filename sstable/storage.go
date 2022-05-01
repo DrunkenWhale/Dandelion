@@ -155,7 +155,7 @@ func ReadAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 	return kvArray, nil
 }
 
-func ReadRangeDBDataFromFile(suffix string, start int, end int) ([]*util.KV, error) {
+func readRangeDBDataFromFile(suffix string, start int, end int) ([]*util.KV, error) {
 	kvArray := make([]*util.KV, 0)
 	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
