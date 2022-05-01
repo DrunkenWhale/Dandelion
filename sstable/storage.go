@@ -199,51 +199,55 @@ func readRangeDBDataFromFile(suffix string, start int, end int) ([]*util.KV, err
 }
 
 func SearchKVFromFile(key int) ([]byte, error) {
-	suffix, err := nextDBFileSuffix()
+	suffixArray, err := getFileSuffixList()
 	if err != nil {
 		return nil, err
 	}
-	kIndexArray, err := readDBIndexFromFile(suffix)
-	if err != nil {
-		return nil, err
-	}
-	left := 0
-	right := len(kIndexArray) - 1
+	//TODO Test
+	// finish special judge test
+	for _, suffix := range suffixArray {
+		kIndexArray, err := readDBIndexFromFile(suffix)
+		if err != nil {
+			return nil, err
+		}
+		left := 0
+		right := len(kIndexArray) - 1
 
-	if kIndexArray[left].GetKey() == key {
-		fmt.Println(kIndexArray[left])
-	}
+		if kIndexArray[left].GetKey() == key {
+			fmt.Println(kIndexArray[left])
+		}
 
-	if kIndexArray[right].GetKey() == key {
-		fmt.Println(kIndexArray[right])
-	}
+		if kIndexArray[right].GetKey() == key {
+			fmt.Println(kIndexArray[right])
+		}
 
-	if kIndexArray[left].GetKey() > key || kIndexArray[right].GetKey() < key {
-		// key value don't include in this file
-		// because key bigger than max value or smaller than min value in this file
-		//Can't find in this file,next
-		//TODO find in next
-		fmt.Println("UnExist")
-	}
+		if kIndexArray[left].GetKey() > key || kIndexArray[right].GetKey() < key {
+			// key value don't include in this file
+			// because key bigger than max value or smaller than min value in this file
+			//Can't find in this file,next
+			//TODO find in next
+			fmt.Println("UnExist")
+		}
 
-	for right-left > 1 {
-		mid := (left + right) / 2
-		if kIndexArray[mid].GetKey() >= key {
-			right = mid
-		} else {
-			left = mid
+		for right-left > 1 {
+			mid := (left + right) / 2
+			if kIndexArray[mid].GetKey() >= key {
+				right = mid
+			} else {
+				left = mid
+			}
+		}
+		kIndex := kIndexArray[right]
+		kvArray, err := readRangeDBDataFromFile(suffix, kIndex.GetStart(), kIndex.GetEnd())
+		if err != nil {
+			return nil, err
+		}
+		res, ok := searchKeyFromKVArray(key, kvArray)
+		if ok {
+			return res.Value, nil
 		}
 	}
-	// TODO Search key from file and get filename with getDBDataFileList
-	kIndex := kIndexArray[right]
-	kvArray, err := readRangeDBDataFromFile(suffix, kIndex.GetStart(), kIndex.GetEnd())
-	if err != nil {
-		return nil, err
-	}
-	res, ok := searchKeyFromKVArray(key, kvArray)
-	if ok {
-		return res.Value, nil
-	}
+
 	return nil, nil
 }
 
@@ -269,6 +273,19 @@ func searchKeyFromKVArray(key int, kvArray []*util.KV) (*util.KV, bool) {
 		return kvArray[right], true
 	}
 	return nil, false
+}
+
+func getFileSuffixList() ([]string, error) {
+	res := make([]string, 0)
+	fileNameList, err := GetDBDataFileList()
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(fileNameList); i++ {
+		tempArray := strings.Split(fileNameList[i], "_")
+		res = append(res, tempArray[len(tempArray)-1])
+	}
+	return res, nil
 }
 
 func readDBIndexFromFile(suffix string) ([]*util.KIndex, error) {
