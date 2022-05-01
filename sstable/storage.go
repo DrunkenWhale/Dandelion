@@ -4,6 +4,7 @@ import (
 	"Dandelion/skiplist"
 	"Dandelion/util"
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -13,19 +14,20 @@ import (
 )
 
 const (
-	sep               = util.Sep
-	defaultBufferSize = 2 * 4096
-	closingBound      = defaultBufferSize * 9 / 10
-	dataFilePrefix    = "dandelion_db_storage_data_"
-	indexFilePrefix   = "dandelion_db_storage_index_"
-	filePathPrefix    = "data" + string(os.PathSeparator)
-	level1MaxSize     = 1024 * 1024 * 8
-	indexRangeSize    = 32
+	sep                    = util.Sep
+	defaultBufferSize      = 2 * 4096
+	closingBound           = defaultBufferSize * 9 / 10
+	dataFilePrefix         = "dandelion_db_storage_data_"
+	indexFilePrefix        = "dandelion_db_storage_index_"
+	storageDBFileDirectory = "data"
+	filePathPrefix         = storageDBFileDirectory + string(os.PathSeparator)
+	level1MaxSize          = 1024 * 1024 * 8
+	indexRangeSize         = 32
 )
 
 var (
 	currentProjectPath, _ = os.Getwd()
-	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + "data" + string(os.PathSeparator)
+	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + storageDBFileDirectory + string(os.PathSeparator)
 )
 
 func WriteDBToFile(suffix string, kv []*util.KV) error {
@@ -66,6 +68,13 @@ func WriteDBToFile(suffix string, kv []*util.KV) error {
 			kIndexes = append(kIndexes, util.NewKIndex(entity.Key, start, end))
 			start = end + 1
 		}
+	}
+	if kIndexes[len(kIndexes)-1].GetKey() != kv[len(kv)-1].Key {
+		kIndexes = append(kIndexes, util.NewKIndex(kv[len(kv)-1].Key, start, end))
+	}
+	err = buf.Flush()
+	if err != nil {
+		return err
 	}
 	err = writeDBIndexToFile(suffix, kIndexes)
 	if err != nil {
@@ -159,6 +168,34 @@ func SearchKVFromFile(key int) error {
 	if err != nil {
 		return err
 	}
+	left := 0
+	right := len(kIndexArray) - 1
+
+	if kIndexArray[left].GetKey() == key {
+		fmt.Println(kIndexArray[left])
+	}
+
+	if kIndexArray[right].GetKey() == key {
+		fmt.Println(kIndexArray[right])
+	}
+
+	if kIndexArray[left].GetKey() > key || kIndexArray[right].GetKey() < key {
+		// key value don't include in this file
+		// because key bigger than max value or smaller than min value in this file
+		//Can't find in this file,next
+		//TODO find in next
+		fmt.Println("UnExist")
+	}
+
+	for right-left > 1 {
+		mid := (left + right) / 2
+		if kIndexArray[mid].GetKey() >= key {
+			right = mid
+		} else {
+			left = mid
+		}
+	}
+	fmt.Println(kIndexArray[right])
 	return nil
 }
 
@@ -282,4 +319,15 @@ func GetDBIndexFileList() ([]string, error) {
 		}
 	}
 	return res, nil
+}
+
+func init() {
+	_, err := os.Stat(storageDBFileDirectory)
+	if err != nil {
+		err = os.Mkdir(storageDBFileDirectory, 0777)
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+	}
 }

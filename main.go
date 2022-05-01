@@ -14,7 +14,7 @@ func main() {
 			log.Fatalln(err)
 		}
 	}
-	err := sstable.SearchKVFromFile(114)
+	err := sstable.SearchKVFromFile(45824)
 	if err != nil {
 		log.Fatalln(err)
 	}
