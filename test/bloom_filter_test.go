@@ -2,6 +2,7 @@ package test
 
 import (
 	"Dandelion/filter"
+	"log"
 	"math/rand"
 	"sort"
 	"testing"
@@ -22,4 +23,20 @@ func TestBloomFilter(t *testing.T) {
 	}
 	//wrong judge rate
 	t.Log(float64(count*1.0) / 114514)
+}
+
+func TestStorageOperation(t *testing.T) {
+	f := filter.NewBloomFilter()
+	for i := 0; i < 114514; i++ {
+		f.Put(i)
+	}
+	err := f.FreezeBloomFilterDataToFile()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	file, err := f.ReadBloomFilterDataFromFile()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	t.Log(file)
 }
