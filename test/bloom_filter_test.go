@@ -2,6 +2,7 @@ package test
 
 import (
 	"Dandelion/filter"
+	"fmt"
 	"log"
 	"math/rand"
 	"sort"
@@ -39,4 +40,5 @@ func TestStorageOperation(t *testing.T) {
 		log.Fatalln(err)
 	}
 	t.Log(file)
+	fmt.Println(filter.GeneratorFilterFromFile().Get(114))
 }
