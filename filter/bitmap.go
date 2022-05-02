@@ -34,3 +34,13 @@ func (bitmap *BitMap) Get(key int) bool {
 	return 0 != (num & (1 << bitIndex))
 
 }
+
+func (bitmap *BitMap) ExpansionBitMap() *BitMap {
+	res := NewBitMap(bitmap.size * 5)
+	for i := 0; i <= (1<<31)-1; i++ {
+		if bitmap.Get(i) {
+			res.Put(i)
+		}
+	}
+	return res
+}
