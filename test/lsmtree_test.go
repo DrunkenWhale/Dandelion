@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestLSMTree(t *testing.T) {
+func TestLSMTree1(t *testing.T) {
 	l := lsm.NewLSM()
 	for _, i := range rand.Perm(114) {
 		err := l.Put(i, []byte(strconv.Itoa(i)))
@@ -23,4 +23,16 @@ func TestLSMTree(t *testing.T) {
 	}
 	t.Log(l.Get(114514))
 
+}
+
+func TestLSMTree2(t *testing.T) {
+	l := lsm.NewLSM()
+	for _, i := range rand.Perm(1145141) {
+		err := l.Put(i, []byte(strconv.Itoa(i)))
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	log.Println(l.Update(114514, []byte("test succeed")))
+	log.Println(l.Get(114514))
 }
