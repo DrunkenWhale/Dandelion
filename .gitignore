@@ -2,6 +2,5 @@
 *.exe
 *.txt
 
-/test
-!/test/*.go
+/test/test
 /data
