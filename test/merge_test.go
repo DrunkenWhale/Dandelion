@@ -21,5 +21,5 @@ func TestMerge(t *testing.T) {
 	for _, e := range r {
 		fmt.Println(e.Key, "==>", string(e.Value))
 	}
-	sstable.WriteDBToFile("test", r)
+	sstable.writeDBToFile("test", r)
 }

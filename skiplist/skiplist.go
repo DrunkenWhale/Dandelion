@@ -70,12 +70,12 @@ func (skipList *SkipList) Put(key int, value []byte) {
 	skipList.size++
 }
 
-func (skipList *SkipList) Get(key int) []byte {
+func (skipList *SkipList) Get(key int) ([]byte, bool) {
 	node := skipList.search(key)
 	if node == nil {
-		return nil
+		return nil, false
 	} else {
-		return node.value
+		return node.value, true
 	}
 }
 

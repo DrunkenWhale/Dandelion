@@ -2,7 +2,6 @@ package test
 
 import (
 	"Dandelion/skiplist"
-	"Dandelion/sstable"
 	"log"
 	"os"
 	"testing"
@@ -17,7 +16,6 @@ func TestWriteDBFile(t *testing.T) {
 	skipList.Put(72378, []byte("114"))
 	skipList.Put(73478, []byte("???"))
 	skipList.Put(77568, []byte("&&&"))
-	sstable.WriteDBToFile("test.txt", skipList.ExportAllElement())
 	f, err := os.OpenFile("test.txt", os.O_WRONLY|os.O_CREATE, 0666)
 	defer func(f *os.File) {
 		err := f.Close()
@@ -27,8 +25,5 @@ func TestWriteDBFile(t *testing.T) {
 	}(f)
 	if err != nil {
 		log.Fatalln(err)
-	}
-	for _, v := range sstable.ReadAllDBDataFromFile("test.txt") {
-		t.Log(v.Key, "==>", string(v.Value))
 	}
 }

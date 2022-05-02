@@ -30,7 +30,7 @@ var (
 	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + storageDBFileDirectory + string(os.PathSeparator)
 )
 
-func WriteDBToFile(suffix string, kv []*util.KV) error {
+func writeDBToFile(suffix string, kv []*util.KV) error {
 
 	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -118,7 +118,7 @@ func writeDBIndexToFile(suffix string, koffset []*util.KIndex) error {
 	return nil
 }
 
-func ReadAllDBDataFromFile(suffix string) ([]*util.KV, error) {
+func readAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 	kvArray := make([]*util.KV, 0)
 	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
@@ -198,17 +198,24 @@ func readRangeDBDataFromFile(suffix string, start int, end int) ([]*util.KV, err
 	return kvArray, nil
 }
 
-func SearchKVFromFile(key int) ([]byte, error) {
+// searchKeyFromFile
+// return :
+// []byte => the value mapped by special key
+// bool   => if key exist and program has no error,
+//			 this return value will be true
+//           otherwise be false
+// error  => error
+func searchKeyFromFile(key int) ([]byte, bool, error) {
 	suffixArray, err := getFileSuffixList()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	//TODO Test
 	// finish special judge test
 	for _, suffix := range suffixArray {
 		kIndexArray, err := readDBIndexFromFile(suffix)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		left := 0
 		right := len(kIndexArray) - 1
@@ -240,15 +247,15 @@ func SearchKVFromFile(key int) ([]byte, error) {
 		kIndex := kIndexArray[right]
 		kvArray, err := readRangeDBDataFromFile(suffix, kIndex.GetStart(), kIndex.GetEnd())
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 		res, ok := searchKeyFromKVArray(key, kvArray)
 		if ok {
-			return res.Value, nil
+			return res.Value, true, nil
 		}
 	}
 
-	return nil, nil
+	return nil, false, nil
 }
 
 // true =>  exist
@@ -277,7 +284,7 @@ func searchKeyFromKVArray(key int, kvArray []*util.KV) (*util.KV, bool) {
 
 func getFileSuffixList() ([]string, error) {
 	res := make([]string, 0)
-	fileNameList, err := GetDBDataFileList()
+	fileNameList, err := getDBDataFileNameList()
 	if err != nil {
 		return nil, err
 	}
@@ -337,18 +344,18 @@ func readDBIndexFromFile(suffix string) ([]*util.KIndex, error) {
 	return kIndexArray, nil
 }
 
-func FreezeDataToFile(list *skiplist.SkipList) error {
+func freezeDataToFile(list *skiplist.SkipList) error {
 	suffixString, err := nextDBFileSuffix()
 	if err != nil {
 		return err
 	}
-	oldKV, err := ReadAllDBDataFromFile(suffixString)
+	oldKV, err := readAllDBDataFromFile(suffixString)
 	if err != nil {
 		return err
 	}
 	newKV := list.ExportAllElement()
 	res := KVArrayMerge(oldKV, newKV)
-	err = WriteDBToFile(suffixString, res)
+	err = writeDBToFile(suffixString, res)
 	if err != nil {
 		return err
 	}
@@ -382,7 +389,7 @@ func nextDBFileSuffix() (string, error) {
 
 }
 
-func GetDBDataFileList() ([]string, error) {
+func getDBDataFileNameList() ([]string, error) {
 	dir, err := os.ReadDir(currentStoragePath)
 	if err != nil {
 		return nil, err
@@ -396,7 +403,7 @@ func GetDBDataFileList() ([]string, error) {
 	return res, nil
 }
 
-func GetDBIndexFileList() ([]string, error) {
+func getDBIndexFileNameList() ([]string, error) {
 	dir, err := os.ReadDir(currentStoragePath)
 	if err != nil {
 		return nil, err
