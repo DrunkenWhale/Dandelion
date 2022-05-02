@@ -22,7 +22,8 @@ const (
 	storageDBFileDirectory = "data"
 	filePathPrefix         = storageDBFileDirectory + string(os.PathSeparator)
 	level1MaxSize          = 1024 * 1024 * 8
-	indexRangeSize         = 32
+	//every indexRangeSize element generator a index
+	indexRangeSize = 32
 )
 
 var (
