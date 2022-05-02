@@ -210,8 +210,6 @@ func searchKeyFromFile(key int) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, err
 	}
-	//TODO Test
-	// finish special judge test
 	for _, suffix := range suffixArray {
 		kIndexArray, err := readDBIndexFromFile(suffix)
 		if err != nil {
@@ -222,18 +220,37 @@ func searchKeyFromFile(key int) ([]byte, bool, error) {
 
 		if kIndexArray[left].GetKey() == key {
 			fmt.Println(kIndexArray[left])
+			kvArray, err := readRangeDBDataFromFile(suffix, kIndexArray[left].GetStart(), kIndexArray[left].GetEnd())
+			if err != nil {
+				return nil, false, err
+			}
+			res, ok := searchKeyFromKVArray(key, kvArray)
+			if ok {
+				return res.Value, true, nil
+			} else {
+				continue
+			}
 		}
 
 		if kIndexArray[right].GetKey() == key {
 			fmt.Println(kIndexArray[right])
+			kvArray, err := readRangeDBDataFromFile(suffix, kIndexArray[right].GetStart(), kIndexArray[right].GetEnd())
+			if err != nil {
+				return nil, false, err
+			}
+			res, ok := searchKeyFromKVArray(key, kvArray)
+			if ok {
+				return res.Value, true, nil
+			} else {
+				continue
+			}
 		}
 
 		if kIndexArray[left].GetKey() > key || kIndexArray[right].GetKey() < key {
 			// key value don't include in this file
 			// because key bigger than max value or smaller than min value in this file
 			//Can't find in this file,next
-			//TODO find in next
-			fmt.Println("UnExist")
+			continue
 		}
 
 		for right-left > 1 {

@@ -6,21 +6,54 @@ import (
 )
 
 const (
-	defaultMemorySize          = 4096 * 8
-	defaultSkipListHeight      = 32
-	putOperation          byte = 0
-	deleteOperation       byte = 1
+
+	// increase defaultMemorySize make SSTable has less persistence operation
+	// and write more data once
+	// decrease I/O consume
+	defaultMemorySize = 4096 * 64
+
+	defaultSkipListHeight = 32
+
+	putOperation byte = 0
+
+	deleteOperation byte = 1
 )
 
 type SSTable struct {
-	skipList      *skiplist.SkipList
-	maxMemorySize int
+	skipList       *skiplist.SkipList
+	maxMemorySize  int
+	skipListHeight int
 }
 
 func NewSSTable() *SSTable {
 	return &SSTable{
-		skipList:      skiplist.NewSkipList(defaultSkipListHeight),
-		maxMemorySize: defaultMemorySize,
+		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
+		maxMemorySize:  defaultMemorySize,
+		skipListHeight: defaultSkipListHeight,
+	}
+}
+
+func NewSSTableWithMemorySize(memorySize int) *SSTable {
+	return &SSTable{
+		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
+		maxMemorySize:  memorySize,
+		skipListHeight: defaultSkipListHeight,
+	}
+}
+
+func NewSSTableWithSkipListHeight(skipListHeight int) *SSTable {
+	return &SSTable{
+		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
+		maxMemorySize:  defaultMemorySize,
+		skipListHeight: skipListHeight,
+	}
+}
+
+func NewSSTableWithMemorySizeAndSkipListHeight(memorySize int, skipListHeight int) *SSTable {
+	return &SSTable{
+		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
+		maxMemorySize:  memorySize,
+		skipListHeight: skipListHeight,
 	}
 }
 
@@ -29,7 +62,7 @@ func (table *SSTable) Get(key int) ([]byte, bool) {
 	if err != nil {
 		// program error
 		// shouldn't exist in truly operation
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	if !ok {
@@ -71,11 +104,12 @@ func (table *SSTable) Put(key int, value []byte) error {
 	return nil
 }
 
-func (table *SSTable) Update(key int, value []byte) {
+func (table *SSTable) Update(key int, value []byte) error {
 	err := table.Put(key, value)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	return nil
 }
 
 func (table *SSTable) Delete(key int) error {
