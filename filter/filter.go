@@ -1,13 +1,13 @@
 package filter
 
 import (
-	"hash/adler32"
+	"hash/crc32"
 	"math"
 	"strconv"
 )
 
 const (
-	defaultBloomFilter = 1 << 12
+	defaultBloomFilterSize = 1 << 20
 )
 
 type BloomFilter struct {
@@ -19,10 +19,10 @@ type BloomFilter struct {
 
 func NewBloomFilter() *BloomFilter {
 	return &BloomFilter{
-		elementMaxSize: defaultBloomFilter * 7,
+		elementMaxSize: defaultBloomFilterSize * 7,
 		elementSize:    0,
-		bitmap:         NewBitMap(defaultBloomFilter * 7),
-		ln2hash:        2,
+		bitmap:         NewBitMap(defaultBloomFilterSize * 7),
+		ln2hash:        3,
 	}
 }
 
@@ -31,13 +31,13 @@ func NewBloomFilterWithSize(elementMaxSize int) *BloomFilter {
 		elementMaxSize: elementMaxSize * 7,
 		elementSize:    0,
 		bitmap:         NewBitMap(elementMaxSize * 7),
-		ln2hash:        int(math.Floor(math.Ln2 * 3)),
+		ln2hash:        int(math.Ceil(math.Ln2 * 3)),
 	}
 }
 
 func (filter *BloomFilter) Put(key int) {
-	for i := 0; i < filter.ln2hash; i++ {
-		filter.bitmap.Put(getHashValue(key, i))
+	for i := 1; i <= filter.ln2hash; i++ {
+		filter.bitmap.Put(getHashValue(key, i) % filter.elementMaxSize)
 	}
 	filter.elementSize++
 
@@ -56,19 +56,19 @@ func (filter *BloomFilter) Put(key int) {
 //return true : key exist
 //return false: key unexist
 func (filter *BloomFilter) Get(key int) bool {
-	for i := 0; i < filter.ln2hash; i++ {
-		if filter.bitmap.Get(getHashValue(key, i) % filter.elementMaxSize) {
-			return true
+	for i := 1; i <= filter.ln2hash; i++ {
+		if !filter.bitmap.Get(getHashValue(key, i) % filter.elementMaxSize) {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func getHashValue(key int, hashNumber int) int {
 	return int(
-		adler32.Checksum(
+		crc32.ChecksumIEEE(
 			[]byte(strconv.Itoa(
-				int(adler32.Checksum(
+				int(crc32.ChecksumIEEE(
 					[]byte(strconv.Itoa(key)))) +
 					(hashNumber)))))
 }
