@@ -220,8 +220,12 @@ func searchKeyFromFile(key int) ([]byte, bool, error) {
 		right := len(kIndexArray) - 1
 
 		if kIndexArray[left].GetKey() == key {
-			fmt.Println(kIndexArray[left])
-			kvArray, err := readRangeDBDataFromFile(suffix, kIndexArray[left].GetStart(), kIndexArray[left].GetEnd())
+			l := kIndexArray[left].GetStart()
+			if l == 0 {
+				l = 1
+			}
+			r := kIndexArray[left].GetEnd()
+			kvArray, err := readRangeDBDataFromFile(suffix, l, r)
 			if err != nil {
 				return nil, false, err
 			}
