@@ -2,8 +2,6 @@ package test
 
 import (
 	"Dandelion/filter"
-	"fmt"
-	"log"
 	"math/rand"
 	"sort"
 	"testing"
@@ -26,19 +24,19 @@ func TestBloomFilter(t *testing.T) {
 	t.Log(float64(count*1.0) / 114514)
 }
 
-func TestStorageOperation(t *testing.T) {
-	f := filter.NewBloomFilter()
-	for i := 0; i < 114514; i++ {
-		f.Put(i)
-	}
-	err := f.FreezeBloomFilterDataToFile()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	file, err := f.ReadBloomFilterDataFromFile()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	t.Log(file)
-	fmt.Println(filter.GeneratorFilterFromFile().Get(114))
-}
+//func TestStorageOperation(t *testing.T) {
+//	f := filter.NewBloomFilter()
+//	for i := 0; i < 114514; i++ {
+//		f.Put(i)
+//	}
+//	err := f.freezeBloomFilterDataToFile()
+//	if err != nil {
+//		log.Fatalln(err)
+//	}
+//	file, err := f.readBloomFilterDataFromFile()
+//	if err != nil {
+//		log.Fatalln(err)
+//	}
+//	t.Log(file)
+//	fmt.Println(filter.GeneratorFilterFromFile().Get(114))
+//}

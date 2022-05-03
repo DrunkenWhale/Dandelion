@@ -49,7 +49,7 @@ func NewBloomFilterWithSize(elementMaxSize int) *BloomFilter {
 
 func GeneratorFilterFromFile() *BloomFilter {
 	filter := NewBloomFilter()
-	arr, err := filter.ReadBloomFilterDataFromFile()
+	arr, err := filter.readBloomFilterDataFromFile()
 	if err != nil {
 		log.Fatalln(arr)
 	}
@@ -62,7 +62,6 @@ func (filter *BloomFilter) Put(key int) {
 		filter.bitmap.Put(getHashValue(key, i) % filter.elementMaxSize)
 	}
 	filter.elementSize++
-
 	//dynamic expansion will cause a bug
 	// hash value mod maxSize will be changed
 
@@ -86,7 +85,7 @@ func (filter *BloomFilter) Get(key int) bool {
 	return true
 }
 
-func (filter *BloomFilter) FreezeBloomFilterDataToFile() error {
+func (filter *BloomFilter) freezeBloomFilterDataToFile() error {
 
 	file, err := os.OpenFile(bloomFilterStorageFilePathPrefix+bloomFilterStorageFileName, os.O_RDONLY|os.O_CREATE, 0777)
 
@@ -101,7 +100,7 @@ func (filter *BloomFilter) FreezeBloomFilterDataToFile() error {
 		}
 	}(file)
 
-	buf := bufio.NewWriterSize(file, defaultBloomFilterSize)
+	buf := bufio.NewWriterSize(file, defaultWriteBuffer)
 	for i, u := range filter.bitmap.core {
 		_, err := buf.WriteString(strconv.FormatUint(u, 10))
 		if err != nil {
@@ -125,7 +124,7 @@ func (filter *BloomFilter) FreezeBloomFilterDataToFile() error {
 	return nil
 }
 
-func (filter *BloomFilter) ReadBloomFilterDataFromFile() ([]uint64, error) {
+func (filter *BloomFilter) readBloomFilterDataFromFile() ([]uint64, error) {
 	res := make([]uint64, 0)
 	file, err := os.OpenFile(bloomFilterStorageFilePathPrefix+bloomFilterStorageFileName, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {

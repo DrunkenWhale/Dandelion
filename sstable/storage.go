@@ -20,8 +20,22 @@ const (
 	dataFilePrefix         = "dandelion_db_storage_data_"
 	indexFilePrefix        = "dandelion_db_storage_index_"
 	storageDBFileDirectory = "data"
-	filePathPrefix         = storageDBFileDirectory + string(os.PathSeparator)
-	level1MaxSize          = 1024 * 1024 * 8
+
+	level0PathPrefix = "level0" + string(os.PathSeparator)
+	level1PathPrefix = "level1" + string(os.PathSeparator)
+	level2PathPrefix = "level2" + string(os.PathSeparator)
+	level3PathPrefix = "level3" + string(os.PathSeparator)
+	level4PathPrefix = "level4" + string(os.PathSeparator)
+	level5PathPrefix = "level5" + string(os.PathSeparator)
+
+	storageFilePathPrefix = storageDBFileDirectory + string(os.PathSeparator)
+	level0FilePathPrefix  = storageFilePathPrefix + level0PathPrefix
+	level1FilePathPrefix  = storageFilePathPrefix + level1PathPrefix
+	level2FilePathPrefix  = storageFilePathPrefix + level2PathPrefix
+	level3FilePathPrefix  = storageFilePathPrefix + level3PathPrefix
+	level4FilePathPrefix  = storageFilePathPrefix + level4PathPrefix
+	level5FilePathPrefix  = storageFilePathPrefix + level5PathPrefix
+	level1MaxSize         = 1024 * 1024 * 8
 	//every indexRangeSize element generator a index
 	indexRangeSize = 32
 )
@@ -33,7 +47,7 @@ var (
 
 func writeDBToFile(suffix string, kv []*util.KV) error {
 
-	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(level0FilePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -86,7 +100,7 @@ func writeDBToFile(suffix string, kv []*util.KV) error {
 }
 
 func writeDBIndexToFile(suffix string, koffset []*util.KIndex) error {
-	file, err := os.OpenFile(filePathPrefix+indexFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(level0FilePathPrefix+indexFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -121,7 +135,7 @@ func writeDBIndexToFile(suffix string, koffset []*util.KIndex) error {
 
 func readAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 	kvArray := make([]*util.KV, 0)
-	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(level0FilePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +172,7 @@ func readAllDBDataFromFile(suffix string) ([]*util.KV, error) {
 
 func readRangeDBDataFromFile(suffix string, start int, end int) ([]*util.KV, error) {
 	kvArray := make([]*util.KV, 0)
-	file, err := os.OpenFile(filePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(level0FilePathPrefix+dataFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return nil, err
 	}
@@ -319,7 +333,7 @@ func getFileSuffixList() ([]string, error) {
 
 func readDBIndexFromFile(suffix string) ([]*util.KIndex, error) {
 	kIndexArray := make([]*util.KIndex, 0)
-	file, err := os.OpenFile(filePathPrefix+indexFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(level0FilePathPrefix+indexFilePrefix+suffix, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return nil, err
 	}
@@ -439,10 +453,29 @@ func getDBIndexFileNameList() ([]string, error) {
 	return res, nil
 }
 
+func MergeLevelDirectory() {
+
+}
+
 func init() {
-	_, err := os.Stat(storageDBFileDirectory)
+	dirArray := []string{
+		storageFilePathPrefix,
+		level0FilePathPrefix,
+		level1FilePathPrefix,
+		level2FilePathPrefix,
+		level3FilePathPrefix,
+		level4FilePathPrefix,
+		level5FilePathPrefix,
+	}
+	for _, dir := range dirArray {
+		createDirectoryIfNotExist(dir)
+	}
+}
+
+func createDirectoryIfNotExist(dir string) {
+	_, err := os.Stat(dir)
 	if err != nil {
-		err = os.Mkdir(storageDBFileDirectory, 0777)
+		err = os.Mkdir(dir, 0777)
 		if err != nil {
 			log.Fatalln(err)
 			return
