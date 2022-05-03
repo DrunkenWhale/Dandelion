@@ -57,6 +57,15 @@ func GeneratorFilterFromFile() *BloomFilter {
 	return filter
 }
 
+func IsBloomFilterPersistenceExist() bool {
+	_, err := os.Stat(bloomFilterStorageFilePathPrefix + bloomFilterStorageFileName)
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
 func (filter *BloomFilter) Put(key int) {
 	for i := 1; i <= filter.ln2hash; i++ {
 		filter.bitmap.Put(getHashValue(key, i) % filter.elementMaxSize)

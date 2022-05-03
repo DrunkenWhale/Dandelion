@@ -10,7 +10,7 @@ const (
 	// increase defaultMemorySize make SSTable has less persistence operation
 	// and write more data once
 	// decrease I/O consume
-	defaultMemorySize = 4096 * 64
+	defaultMemorySize = 4096 * 8 * 8
 
 	defaultSkipListHeight = 32
 

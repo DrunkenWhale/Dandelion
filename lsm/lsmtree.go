@@ -11,9 +11,15 @@ type LSM struct {
 }
 
 func NewLSM() *LSM {
+	var f *filter.BloomFilter
+	if filter.IsBloomFilterPersistenceExist() {
+		f = filter.GeneratorFilterFromFile()
+	} else {
+		f = filter.NewBloomFilter()
+	}
 	return &LSM{
 		table: sstable.NewSSTable(),
-		bloom: filter.NewBloomFilter(),
+		bloom: f,
 	}
 }
 
@@ -21,7 +27,6 @@ func (lsm *LSM) Get(key int) ([]byte, bool) {
 	if lsm.bloom.Get(key) {
 		return lsm.table.Get(key)
 	} else {
-		// can't restart
 		return nil, false
 	}
 }
