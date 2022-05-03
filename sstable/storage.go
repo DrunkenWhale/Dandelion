@@ -43,11 +43,24 @@ const (
 var (
 	currentProjectPath, _ = os.Getwd()
 	currentStoragePath    = currentProjectPath + string(os.PathSeparator) + storageDBFileDirectory + string(os.PathSeparator)
+
+	levelPrefixArray = [6]string{
+		level0PathPrefix,
+		level1PathPrefix,
+		level2PathPrefix,
+		level3PathPrefix,
+		level4PathPrefix,
+		level5PathPrefix,
+	}
 )
 
-func writeDBToFile(suffix string, kv []*util.KV) error {
+func writeLevel0DBToFile(suffix string, kv []*util.KV) error {
+	return writeDBToFile(suffix, kv, 0)
+}
 
-	file, err := os.OpenFile(level0FilePathPrefix+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
+func writeDBToFile(suffix string, kv []*util.KV, level int) error {
+
+	file, err := os.OpenFile(levelPrefixArray[level]+dataFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -91,7 +104,7 @@ func writeDBToFile(suffix string, kv []*util.KV) error {
 	if err != nil {
 		return err
 	}
-	err = writeDBIndexToFile(suffix, kIndexes)
+	err = writeDBIndexToFile(suffix, kIndexes, level)
 	if err != nil {
 		return err
 
@@ -99,8 +112,12 @@ func writeDBToFile(suffix string, kv []*util.KV) error {
 	return nil
 }
 
-func writeDBIndexToFile(suffix string, koffset []*util.KIndex) error {
-	file, err := os.OpenFile(level0FilePathPrefix+indexFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
+func writeLevel0DBIndexToFile(suffix string, koffset []*util.KIndex) error {
+	return writeDBIndexToFile(suffix, koffset, 0)
+}
+
+func writeDBIndexToFile(suffix string, koffset []*util.KIndex, level int) error {
+	file, err := os.OpenFile(levelPrefixArray[level]+indexFilePrefix+suffix, os.O_WRONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
@@ -320,7 +337,7 @@ func searchKeyFromKVArray(key int, kvArray []*util.KV) (*util.KV, bool) {
 
 func getFileSuffixList() ([]string, error) {
 	res := make([]string, 0)
-	fileNameList, err := getDBDataFileNameList()
+	fileNameList, err := getLevel0DBDataFileNameList()
 	if err != nil {
 		return nil, err
 	}
@@ -391,7 +408,7 @@ func freezeDataToFile(list *skiplist.SkipList) error {
 	}
 	newKV := list.ExportAllElement()
 	res := KVArrayMerge(oldKV, newKV)
-	err = writeDBToFile(suffixString, res)
+	err = writeLevel0DBToFile(suffixString, res)
 	if err != nil {
 		return err
 	}
@@ -425,7 +442,7 @@ func nextDBFileSuffix() (string, error) {
 
 }
 
-func getDBDataFileNameList() ([]string, error) {
+func getLevel0DBDataFileNameList() ([]string, error) {
 	dir, err := os.ReadDir(currentStoragePath)
 	if err != nil {
 		return nil, err
@@ -439,7 +456,7 @@ func getDBDataFileNameList() ([]string, error) {
 	return res, nil
 }
 
-func getDBIndexFileNameList() ([]string, error) {
+func getLevel0DBIndexFileNameList() ([]string, error) {
 	dir, err := os.ReadDir(currentStoragePath)
 	if err != nil {
 		return nil, err
@@ -453,8 +470,24 @@ func getDBIndexFileNameList() ([]string, error) {
 	return res, nil
 }
 
-func MergeLevelDirectory() {
-
+func MergeLevel0Directory() error {
+	list, err := getFileSuffixList()
+	kvs := make([]*util.KV, 0)
+	if err != nil {
+		return err
+	}
+	for _, suffix := range list {
+		tempKVArrays, err := readAllDBDataFromFile(suffix)
+		if err != nil {
+			return err
+		}
+		kvs = KVArrayMerge(kvs, tempKVArrays)
+	}
+	err = writeDBToFile(strconv.FormatInt(time.Now().Unix(), 10), kvs, 1)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func init() {
