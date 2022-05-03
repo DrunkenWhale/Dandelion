@@ -74,6 +74,14 @@ func (filter *BloomFilter) Put(key int) {
 	//dynamic expansion will cause a bug
 	// hash value mod maxSize will be changed
 
+	// every 50000 elements will cause a persistence
+	// if number too smaller, write time will be too long
+	if filter.elementSize%50000 == 0 {
+		err := filter.freezeBloomFilterDataToFile()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 	//expansion bloom_filter
 	//if float32(1.0*filter.elementMaxSize/filter.elementSize) < 1.7 {
 	//	filter.bitmap = filter.bitmap.ExpansionBitMap()
