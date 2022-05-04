@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"strconv"
-	"time"
 )
 
 func main() {
@@ -19,5 +18,4 @@ func main() {
 	}
 	values, ok := l.Get(114)
 	fmt.Println(string(values), ok)
-	time.Sleep(time.Second * 1000)
 }

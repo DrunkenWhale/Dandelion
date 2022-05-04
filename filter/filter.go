@@ -104,7 +104,7 @@ func (filter *BloomFilter) Get(key int) bool {
 
 func (filter *BloomFilter) freezeBloomFilterDataToFile() error {
 
-	file, err := os.OpenFile(bloomFilterStorageFilePathPrefix+bloomFilterStorageFileName, os.O_RDONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(bloomFilterStorageFilePathPrefix+bloomFilterStorageFileName, os.O_WRONLY|os.O_CREATE, 0777)
 
 	if err != nil {
 		return err
