@@ -549,6 +549,8 @@ func MergeLevelFile(level int) error {
 	return nil
 }
 
+const checkFileTime = time.Second * 60 * 10
+
 func init() {
 	dirArray := []string{
 		storageFilePathPrefix,
@@ -562,6 +564,28 @@ func init() {
 	for _, dir := range dirArray {
 		createDirectoryIfNotExist(dir)
 	}
+
+	go func() {
+		ticker := time.NewTicker(checkFileTime)
+		for range ticker.C {
+			for level := 0; level <= 5; level++ {
+				func() {
+					dir, err := os.ReadDir(levelPrefixArray[level])
+					if err != nil {
+						log.Fatalln(err)
+						return
+					}
+					if len(dir) >= 8 {
+						err := MergeLevelFile(level)
+						if err != nil {
+							log.Fatalln(err)
+							return
+						}
+					}
+				}()
+			}
+		}
+	}()
 }
 
 func createDirectoryIfNotExist(dir string) {
