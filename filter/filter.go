@@ -143,7 +143,7 @@ func (filter *BloomFilter) freezeBloomFilterDataToFile() error {
 
 func (filter *BloomFilter) readBloomFilterDataFromFile() ([]uint64, error) {
 	res := make([]uint64, 0)
-	file, err := os.OpenFile(bloomFilterStorageFilePathPrefix+bloomFilterStorageFileName, os.O_WRONLY|os.O_CREATE, 0777)
+	file, err := os.OpenFile(bloomFilterStorageFilePathPrefix+bloomFilterStorageFileName, os.O_RDONLY|os.O_CREATE, 0777)
 	if err != nil {
 		return nil, err
 	}
