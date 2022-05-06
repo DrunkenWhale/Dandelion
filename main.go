@@ -1,21 +1,42 @@
 package main
 
 import (
-	"Dandelion/lsm"
+	"bufio"
 	"fmt"
-	"log"
-	"math/rand"
-	"strconv"
+	"net"
+	"os"
+	"strings"
 )
 
 func main() {
-	l := lsm.NewLSM()
-	for _, i := range rand.Perm(1145147) {
-		err := l.Put(i, []byte(strconv.Itoa(i)))
+
+}
+
+const (
+	port = 11451
+)
+
+func startClient() {
+	conn, err := net.Dial("tcp", "0.0.0.0:11451")
+	if err != nil {
+		fmt.Printf("dial failed, err:%v\n", err)
+		return
+	}
+
+	fmt.Println("Conn Established...:")
+
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		data, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatalln(err)
+			fmt.Printf("read from console failed, err:%v\n", err)
+			break
+		}
+		data = strings.TrimSpace(data)
+		_, err = conn.Write([]byte(data))
+		if err != nil {
+			fmt.Printf("write failed, err:%v\n", err)
+			break
 		}
 	}
-	values, ok := l.Get(114)
-	fmt.Println(string(values), ok)
 }
