@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	startServer()
+	//startClient()
 
 }
 
@@ -21,6 +23,7 @@ const (
 
 func startClient() {
 	conn, err := net.Dial("tcp", "0.0.0.0:11451")
+	buf := bufio.NewReader(conn)
 	if err != nil {
 		fmt.Printf("dial failed, err:%v\n", err)
 		return
@@ -35,12 +38,17 @@ func startClient() {
 			fmt.Printf("read from console failed, err:%v\n", err)
 			break
 		}
-		data = strings.TrimSpace(data)
 		_, err = conn.Write([]byte(data))
 		if err != nil {
 			fmt.Printf("write failed, err:%v\n", err)
 			break
 		}
+		readString, err := buf.ReadString(3)
+		if err != nil {
+			log.Fatalln(readString)
+			return
+		}
+		log.Println(readString)
 	}
 }
 
@@ -67,7 +75,7 @@ func startServer() {
 				}
 				order := str
 				opArrays := strings.Split(order, " ")
-				key, err := strconv.Atoi(opArrays[1])
+				key, err := strconv.Atoi(strings.TrimSpace(opArrays[1]))
 				if err != nil {
 					log.Fatalln(err)
 				}
@@ -76,20 +84,20 @@ func startServer() {
 					if err != nil {
 						log.Fatalln(err)
 					}
-					_, err = conn.Write([]byte("OK"))
+					_, err = conn.Write(append([]byte("OK"), 3))
 					if err != nil {
 						log.Fatalln(err)
 						return
 					}
 				} else if opArrays[0] == "get" {
 					if bytes, ok := lsm.Get(key); ok {
-						_, err := conn.Write(bytes)
+						_, err := conn.Write(append(bytes, 3))
 						if err != nil {
 							log.Fatalln(err)
 							return
 						}
 					} else {
-						_, err := conn.Write([]byte("Key Unexist"))
+						_, err := conn.Write(append([]byte("Key Unexist"), 3))
 						if err != nil {
 							log.Fatalln(err)
 							return
@@ -101,7 +109,7 @@ func startServer() {
 						log.Fatalln(err)
 						return
 					}
-					_, err = conn.Write([]byte("Update Succeed"))
+					_, err = conn.Write(append([]byte("Update Succeed"), 3))
 					if err != nil {
 						log.Fatalln(err)
 						return
@@ -111,7 +119,7 @@ func startServer() {
 					if err != nil {
 						log.Fatalln(err)
 					}
-					_, err = conn.Write([]byte("Delete Succeed"))
+					_, err = conn.Write(append([]byte("Delete Succeed"), 3))
 					if err != nil {
 						log.Fatalln(err)
 						return
