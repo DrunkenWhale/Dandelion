@@ -44,3 +44,7 @@ func (lsm *LSM) Update(key int, value []byte) error {
 func (lsm *LSM) Delete(key int) error {
 	return lsm.table.Delete(key)
 }
+
+func (lsm *LSM) flush() error {
+	return lsm.table.Flush()
+}

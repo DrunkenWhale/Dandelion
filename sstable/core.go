@@ -136,3 +136,11 @@ func (table *SSTable) search(key int) ([]byte, bool, error) {
 func (table *SSTable) searchFromFile(key int) ([]byte, bool, error) {
 	return searchKeyFromFile(key)
 }
+
+func (table *SSTable) Flush() error {
+	err := freezeDataToFile(table.skipList)
+	if err != nil {
+		return err
+	}
+	return nil
+}
