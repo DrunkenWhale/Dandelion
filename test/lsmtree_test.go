@@ -3,10 +3,12 @@ package test
 import (
 	"Dandelion/lsm"
 	"Dandelion/sstable"
+	"fmt"
 	"log"
 	"math/rand"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestLSMTree1(t *testing.T) {
@@ -74,4 +76,21 @@ func TestLSMTree4(t *testing.T) {
 	values, ok = l.Get(114)
 	//output nil, false
 	t.Log(string(values), ok)
+}
+
+func TestLSMTree5(t *testing.T) {
+	l := lsm.NewLSM()
+	for _, i := range rand.Perm(114251751) {
+		err := l.Put(i, []byte(strconv.Itoa(i)))
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	err := sstable.MergeLevel0File()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	values, ok := l.Get(114)
+	fmt.Println(values, ok)
+	time.Sleep(time.Minute * 7)
 }
