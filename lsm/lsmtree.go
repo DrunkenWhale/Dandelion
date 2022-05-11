@@ -45,6 +45,6 @@ func (lsm *LSM) Delete(key int) error {
 	return lsm.table.Delete(key)
 }
 
-func (lsm *LSM) flush() error {
+func (lsm *LSM) Flush() error {
 	return lsm.table.Flush()
 }
