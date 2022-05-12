@@ -34,6 +34,11 @@ func main() {
 	err = l.Update(114, []byte("114514"))
 	err = l.Delete(114)
 	values, ok = l.Get(114)
+	err = l.Flush()
+	if err != nil {
+		log.Fatalln(err)
+		return 
+	}
 	//output nil, false
 	log.Println(string(values), ok)
 }
