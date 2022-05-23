@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func TestLSMTree1(t *testing.T) {
@@ -80,17 +79,20 @@ func TestLSMTree4(t *testing.T) {
 
 func TestLSMTree5(t *testing.T) {
 	l := lsm.NewLSM()
-	for _, i := range rand.Perm(114251751) {
+	for _, i := range rand.Perm(1142571) {
 		err := l.Put(i, []byte(strconv.Itoa(i)))
 		if err != nil {
 			log.Fatalln(err)
 		}
 	}
-	err := sstable.MergeLevel0File()
+	err := l.Flush()
+	if err != nil {
+		t.Error(err)
+	}
+	err = sstable.MergeLevel0File()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	values, ok := l.Get(114)
 	fmt.Println(values, ok)
-	time.Sleep(time.Minute * 7)
 }

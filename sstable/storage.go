@@ -45,7 +45,7 @@ const (
 	//every indexRangeSize element generator a index
 	indexRangeSize = 32 * 8
 
-	checkFileTime = time.Second * 60 * 3
+	checkFileTime = time.Second * 10
 )
 
 var (
@@ -551,6 +551,28 @@ func MergeLevelFile(level int) error {
 	return nil
 }
 
+func getLevel0DBFileSize() int {
+	return getLevelDBFileSize(0)
+}
+
+func getLevelDBFileSize(level int) int {
+	dirs, err := getLevelDBDataFileNameList(level)
+	if err != nil {
+		log.Fatalln(err)
+		return 0
+	}
+	sum := 0
+	for _, filename := range dirs {
+		stat, err := os.Stat(levelPrefixArray[level] + filename)
+		if err != nil {
+			log.Fatalln(err)
+			return 0
+		}
+		sum += int(stat.Size())
+	}
+	return sum
+}
+
 func init() {
 	dirArray := []string{
 		storageFilePathPrefix,
@@ -570,20 +592,7 @@ func init() {
 		for range ticker.C {
 			for level := 0; level <= 5; level++ {
 				func() {
-					dirs, err := getLevelDBDataFileNameList(level)
-					if err != nil {
-						log.Fatalln(err)
-						return
-					}
-					sum := 0
-					for _, filename := range dirs {
-						stat, err := os.Stat(levelPrefixArray[level] + filename)
-						if err != nil {
-							log.Fatalln(err)
-							return
-						}
-						sum += int(stat.Size())
-					}
+					sum := getLevel0DBFileSize()
 					if sum >= levelSizeArray[level]*8 {
 						err := MergeLevelFile(level)
 						if err != nil {
