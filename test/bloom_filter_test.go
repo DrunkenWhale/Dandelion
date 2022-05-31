@@ -8,20 +8,24 @@ import (
 )
 
 func TestBloomFilter(t *testing.T) {
-	p := rand.Perm(114514)
+	p := rand.Perm(11451419)
 	sort.Ints(p)
-	f := filter.NewBloomFilter()
+	f := filter.NewBloomFilterWithSize(11451419)
 	for _, t := range p {
 		f.Put(t)
 	}
 	count := 0
 	for i := 0; i < len(p); i++ {
-		if f.Get(114514 + i) {
+		if f.Get(11451419 + i) {
 			count++
 		}
 	}
 	//wrong judge rate
-	t.Log(float64(count*1.0) / 114514)
+	t.Log(float64(count*1.0) / 11451411)
+	err := filter.ClearBloomFilter(f)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 //func TestStorageOperation(t *testing.T) {

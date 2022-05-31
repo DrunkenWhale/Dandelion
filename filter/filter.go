@@ -21,7 +21,7 @@ const (
 	defaultReadBuffer  = 4096 * 8
 	defaultWriteBuffer = 4096 * 8
 
-	defaultFreezeFilterElementSize = 50_000
+	defaultFreezeFilterElementSize = 5_000_000
 )
 
 type BloomFilter struct {
