@@ -20,6 +20,8 @@ const (
 
 	defaultReadBuffer  = 4096 * 8
 	defaultWriteBuffer = 4096 * 8
+
+	defaultFreezeFilterElementSize = 50_000
 )
 
 type BloomFilter struct {
@@ -36,6 +38,22 @@ func NewBloomFilter() *BloomFilter {
 		bitmap:         NewBitMap(defaultBloomFilterSize * 7),
 		ln2hash:        3,
 	}
+}
+
+func ClearBloomFilter(bloom *BloomFilter) error {
+	exist := IsBloomFilterPersistenceExist()
+	if exist {
+		err := RemoveBloomFilterPersistenceFile()
+		if err != nil {
+			return err
+		}
+	}
+	if bloom.elementMaxSize == defaultBloomFilterSize*7 {
+		bloom = NewBloomFilter()
+	} else {
+		bloom = NewBloomFilterWithSize(bloom.elementMaxSize / 7)
+	}
+	return nil
 }
 
 func NewBloomFilterWithSize(elementMaxSize int) *BloomFilter {
@@ -66,6 +84,14 @@ func IsBloomFilterPersistenceExist() bool {
 	}
 }
 
+func RemoveBloomFilterPersistenceFile() error {
+	err := os.Remove(bloomFilterStorageFilePathPrefix + bloomFilterStorageFileName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (filter *BloomFilter) Put(key int) {
 	for i := 1; i <= filter.ln2hash; i++ {
 		filter.bitmap.Put(getHashValue(key, i) % filter.elementMaxSize)
@@ -76,7 +102,7 @@ func (filter *BloomFilter) Put(key int) {
 
 	// every 50000 elements will cause a persistence
 	// if number too smaller, write time will be too long
-	if filter.elementSize%50000 == 0 {
+	if filter.elementSize%defaultFreezeFilterElementSize == 0 {
 		err := filter.freezeBloomFilterDataToFile()
 		if err != nil {
 			log.Fatalln(err)
