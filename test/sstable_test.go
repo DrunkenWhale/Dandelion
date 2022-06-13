@@ -9,7 +9,7 @@ import (
 func TestSSTable(t *testing.T) {
 	table := sstable.NewSSTable()
 
-	for i := 0; i < 1145141; i++ {
+	for i := 0; i < 11451; i++ {
 		err := table.Put(i, []byte("114514"))
 		if err != nil {
 			log.Fatalln(err)

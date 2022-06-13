@@ -3,6 +3,8 @@ package sstable
 import (
 	"Dandelion/skiplist"
 	"log"
+	"sync"
+	"time"
 )
 
 const (
@@ -17,44 +19,92 @@ const (
 	putOperation byte = 0
 
 	deleteOperation byte = 1
+
+	autoFlushTimeInterval = 7 * time.Second
 )
 
 type SSTable struct {
+	mutex sync.Mutex
+
 	skipList       *skiplist.SkipList
 	maxMemorySize  int
 	skipListHeight int
 }
 
 func NewSSTable() *SSTable {
-	return &SSTable{
+
+	sstable := &SSTable{
 		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
 		maxMemorySize:  defaultMemorySize,
 		skipListHeight: defaultSkipListHeight,
 	}
+	go func() {
+		ticker := time.NewTicker(autoFlushTimeInterval)
+		for range ticker.C {
+			err := sstable.Flush()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}()
+
+	return sstable
 }
 
 func NewSSTableWithMemorySize(memorySize int) *SSTable {
-	return &SSTable{
+	sstable := &SSTable{
 		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
 		maxMemorySize:  memorySize,
 		skipListHeight: defaultSkipListHeight,
 	}
+	go func() {
+		ticker := time.NewTicker(autoFlushTimeInterval)
+		for range ticker.C {
+			err := sstable.Flush()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}()
+	return sstable
 }
 
 func NewSSTableWithSkipListHeight(skipListHeight int) *SSTable {
-	return &SSTable{
+	sstable := &SSTable{
 		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
 		maxMemorySize:  defaultMemorySize,
 		skipListHeight: skipListHeight,
 	}
+	go func() {
+		ticker := time.NewTicker(autoFlushTimeInterval)
+		for range ticker.C {
+			err := sstable.Flush()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}()
+
+	return sstable
 }
 
 func NewSSTableWithMemorySizeAndSkipListHeight(memorySize int, skipListHeight int) *SSTable {
-	return &SSTable{
+	sstable := &SSTable{
 		skipList:       skiplist.NewSkipList(defaultSkipListHeight),
 		maxMemorySize:  memorySize,
 		skipListHeight: skipListHeight,
 	}
+	go func() {
+		ticker := time.NewTicker(autoFlushTimeInterval)
+		for range ticker.C {
+			err := sstable.Flush()
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}()
+
+	return sstable
 }
 
 func (table *SSTable) Get(key int) ([]byte, bool) {
@@ -89,12 +139,15 @@ func (table *SSTable) Get(key int) ([]byte, bool) {
 }
 
 func (table *SSTable) Put(key int, value []byte) error {
+	table.mutex.Lock()
+	defer table.mutex.Unlock()
 	v := append(
 		[]byte{
 			putOperation,
 		}, value...)
 	table.skipList.Put(key, v)
 	if table.skipList.MemorySize() > defaultMemorySize {
+		// storage data to disk
 		err := freezeDataToFile(table.skipList)
 		if err != nil {
 			return err
@@ -138,6 +191,8 @@ func (table *SSTable) searchFromFile(key int) ([]byte, bool, error) {
 }
 
 func (table *SSTable) Flush() error {
+	table.mutex.Lock()
+	defer table.mutex.Unlock()
 	err := freezeDataToFile(table.skipList)
 	if err != nil {
 		return err

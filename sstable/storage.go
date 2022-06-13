@@ -45,7 +45,7 @@ const (
 	//every indexRangeSize element generator a index
 	indexRangeSize = 32 * 8
 
-	checkFileTime = time.Second * 10
+	checkFileTime = time.Second * 60
 )
 
 var (

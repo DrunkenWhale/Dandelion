@@ -79,7 +79,7 @@ func TestLSMTree4(t *testing.T) {
 
 func TestLSMTree5(t *testing.T) {
 	l := lsm.NewLSM()
-	for _, i := range rand.Perm(1142571) {
+	for _, i := range rand.Perm(11421) {
 		err := l.Put(i, []byte(strconv.Itoa(i)))
 		if err != nil {
 			log.Fatalln(err)
