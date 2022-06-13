@@ -38,15 +38,18 @@ func NewSSTable() *SSTable {
 		maxMemorySize:  defaultMemorySize,
 		skipListHeight: defaultSkipListHeight,
 	}
-	go func() {
-		ticker := time.NewTicker(autoFlushTimeInterval)
-		for range ticker.C {
-			err := sstable.Flush()
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}
-	}()
+	// this function should be implemented in high level abstraction
+	// shouldn't be implemented in lsm/sstable
+	// and user should choose whether auto flush
+	//go func() {
+	//	ticker := time.NewTicker(autoFlushTimeInterval)
+	//	for range ticker.C {
+	//		err := sstable.Flush()
+	//		if err != nil {
+	//			log.Fatalln(err)
+	//		}
+	//	}
+	//}()
 
 	return sstable
 }
@@ -57,15 +60,15 @@ func NewSSTableWithMemorySize(memorySize int) *SSTable {
 		maxMemorySize:  memorySize,
 		skipListHeight: defaultSkipListHeight,
 	}
-	go func() {
-		ticker := time.NewTicker(autoFlushTimeInterval)
-		for range ticker.C {
-			err := sstable.Flush()
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}
-	}()
+	//go func() {
+	//	ticker := time.NewTicker(autoFlushTimeInterval)
+	//	for range ticker.C {
+	//		err := sstable.Flush()
+	//		if err != nil {
+	//			log.Fatalln(err)
+	//		}
+	//	}
+	//}()
 	return sstable
 }
 
@@ -75,15 +78,15 @@ func NewSSTableWithSkipListHeight(skipListHeight int) *SSTable {
 		maxMemorySize:  defaultMemorySize,
 		skipListHeight: skipListHeight,
 	}
-	go func() {
-		ticker := time.NewTicker(autoFlushTimeInterval)
-		for range ticker.C {
-			err := sstable.Flush()
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}
-	}()
+	//go func() {
+	//	ticker := time.NewTicker(autoFlushTimeInterval)
+	//	for range ticker.C {
+	//		err := sstable.Flush()
+	//		if err != nil {
+	//			log.Fatalln(err)
+	//		}
+	//	}
+	//}()
 
 	return sstable
 }
@@ -94,15 +97,16 @@ func NewSSTableWithMemorySizeAndSkipListHeight(memorySize int, skipListHeight in
 		maxMemorySize:  memorySize,
 		skipListHeight: skipListHeight,
 	}
-	go func() {
-		ticker := time.NewTicker(autoFlushTimeInterval)
-		for range ticker.C {
-			err := sstable.Flush()
-			if err != nil {
-				log.Fatalln(err)
-			}
-		}
-	}()
+
+	//go func() {
+	//	ticker := time.NewTicker(autoFlushTimeInterval)
+	//	for range ticker.C {
+	//		err := sstable.Flush()
+	//		if err != nil {
+	//			log.Fatalln(err)
+	//		}
+	//	}
+	//}()
 
 	return sstable
 }
