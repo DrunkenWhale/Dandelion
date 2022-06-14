@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Dandelion/repl"
 	"flag"
+	"github.com/Pigeon377/Dandelion/repl"
 )
 
 func main() {

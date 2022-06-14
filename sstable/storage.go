@@ -1,9 +1,9 @@
 package sstable
 
 import (
-	"Dandelion/skiplist"
-	"Dandelion/util"
 	"bufio"
+	"github.com/Pigeon377/Dandelion/skiplist"
+	"github.com/Pigeon377/Dandelion/util"
 	"io"
 	"log"
 	"os"

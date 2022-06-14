@@ -1,8 +1,8 @@
 package lsm
 
 import (
-	"Dandelion/filter"
-	"Dandelion/sstable"
+	"github.com/Pigeon377/Dandelion/filter"
+	"github.com/Pigeon377/Dandelion/sstable"
 )
 
 type LSM struct {

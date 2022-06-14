@@ -1,9 +1,9 @@
 package test
 
 import (
-	"Dandelion/skiplist"
-	"Dandelion/sstable"
 	"fmt"
+	"github.com/Pigeon377/Dandelion/skiplist"
+	"github.com/Pigeon377/Dandelion/sstable"
 	"math/rand"
 	"strconv"
 	"testing"

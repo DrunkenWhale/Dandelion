@@ -1,7 +1,7 @@
 package test
 
 import (
-	"Dandelion/filter"
+	"github.com/Pigeon377/Dandelion/filter"
 	"math/rand"
 	"sort"
 	"testing"

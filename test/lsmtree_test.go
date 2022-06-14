@@ -1,9 +1,9 @@
 package test
 
 import (
-	"Dandelion/lsm"
-	"Dandelion/sstable"
 	"fmt"
+	"github.com/Pigeon377/Dandelion/lsm"
+	"github.com/Pigeon377/Dandelion/sstable"
 	"log"
 	"math/rand"
 	"strconv"

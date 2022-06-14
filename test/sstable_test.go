@@ -1,7 +1,7 @@
 package test
 
 import (
-	"Dandelion/sstable"
+	"github.com/Pigeon377/Dandelion/sstable"
 	"log"
 	"testing"
 )

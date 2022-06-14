@@ -1,9 +1,9 @@
 package repl
 
 import (
-	lsm2 "Dandelion/lsm"
 	"bufio"
 	"fmt"
+	lsm2 "github.com/Pigeon377/Dandelion/lsm"
 	"log"
 	"net"
 	"strconv"

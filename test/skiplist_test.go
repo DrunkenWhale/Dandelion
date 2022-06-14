@@ -1,7 +1,7 @@
 package test
 
 import (
-	"Dandelion/skiplist"
+	"github.com/Pigeon377/Dandelion/skiplist"
 	"testing"
 	"time"
 )

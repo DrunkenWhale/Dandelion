@@ -1,8 +1,8 @@
 package skiplist
 
 import (
-	"Dandelion/util"
 	"fmt"
+	"github.com/Pigeon377/Dandelion/util"
 	"math/rand"
 	"time"
 )

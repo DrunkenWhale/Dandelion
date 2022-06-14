@@ -1,7 +1,7 @@
 package sstable
 
 import (
-	"Dandelion/skiplist"
+	"github.com/Pigeon377/Dandelion/skiplist"
 	"log"
 	"sync"
 	"time"
