@@ -156,7 +156,8 @@ func (table *SSTable) Put(key int, value []byte) error {
 		if err != nil {
 			return err
 		}
-		table.skipList = skiplist.NewSkipList(defaultSkipListHeight)
+		// needn't clear skiplist
+		//table.skipList = skiplist.NewSkipList(defaultSkipListHeight)
 	}
 	return nil
 }
@@ -201,5 +202,16 @@ func (table *SSTable) Flush() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// ClearMemory
+// clear skiplist and flush data to disk
+func (table *SSTable) ClearMemory() error {
+	err := freezeDataToFile(table.skipList)
+	if err != nil {
+		return err
+	}
+	table.skipList = skiplist.NewSkipList(defaultSkipListHeight)
 	return nil
 }

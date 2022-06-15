@@ -48,3 +48,7 @@ func (lsm *LSM) Delete(key int) error {
 func (lsm *LSM) Flush() error {
 	return lsm.table.Flush()
 }
+
+func (lsm *LSM) ClearMemory() error {
+	return lsm.table.ClearMemory()
+}
