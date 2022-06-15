@@ -45,10 +45,15 @@ func (lsm *LSM) Delete(key int) error {
 	return lsm.table.Delete(key)
 }
 
+// Flush
+// persistence data to disk
 func (lsm *LSM) Flush() error {
 	return lsm.table.Flush()
 }
 
+// ClearMemory
+// flush data to disk
+// and clear skiplist in memory
 func (lsm *LSM) ClearMemory() error {
 	return lsm.table.ClearMemory()
 }

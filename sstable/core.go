@@ -195,6 +195,8 @@ func (table *SSTable) searchFromFile(key int) ([]byte, bool, error) {
 	return searchKeyFromFile(key)
 }
 
+// Flush
+// flush data to disk
 func (table *SSTable) Flush() error {
 	table.mutex.Lock()
 	defer table.mutex.Unlock()
@@ -208,7 +210,7 @@ func (table *SSTable) Flush() error {
 // ClearMemory
 // clear skiplist and flush data to disk
 func (table *SSTable) ClearMemory() error {
-	err := freezeDataToFile(table.skipList)
+	err := table.Flush()
 	if err != nil {
 		return err
 	}

@@ -23,6 +23,14 @@ func TestLSMTree1(t *testing.T) {
 			t.Log(i, string(values))
 		}
 	}
+	err := l.Flush()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = l.ClearMemory()
+	if err != nil {
+		log.Fatalln(err)
+	}
 	t.Log(l.Get(114514))
 
 }
