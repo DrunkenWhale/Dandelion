@@ -57,3 +57,7 @@ func (lsm *LSM) Flush() error {
 func (lsm *LSM) ClearMemory() error {
 	return lsm.table.ClearMemory()
 }
+
+func (lsm *LSM) ClearFilter() error {
+	return filter.ClearBloomFilter(lsm.bloom)
+}
